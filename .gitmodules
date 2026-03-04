@@ -1,3 +1,6 @@
 [submodule "roa_policy_driver"]
 	path = roa_policy_driver
 	url = https://github.com/WJJJ2004/roa_policy_driver
+[submodule "joystick_rsu"]
+	path = joystick_rsu
+	url = https://github.com/WJJJ2004/joystick_rsu
