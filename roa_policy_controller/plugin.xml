@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<library path="roa_policy_controller">
+  <class
+    name="roa_policy_controller/RoaPolicyController"
+    type="roa_policy_controller::RoaPolicyController"
+    base_class_type="controller_interface::ControllerInterface">
+    <description>ROA policy controller (ros2_control plugin)</description>
+  </class>
+</library>
