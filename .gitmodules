@@ -4,3 +4,9 @@
 [submodule "joystick_rsu"]
 	path = joystick_rsu
 	url = https://github.com/WJJJ2004/joystick_rsu
+[submodule "imu_serial_reader"]
+	path = imu_serial_reader
+	url = https://github.com/WJJJ2004/imu_serial_reader
+[submodule "robstride_hardware_interface"]
+	path = robstride_hardware_interface
+	url = https://github.com/WJJJ2004/robstride_hardware_interface
