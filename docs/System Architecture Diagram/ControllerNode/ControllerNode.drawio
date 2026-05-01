@@ -1,0 +1,163 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="29.6.1">
+  <diagram name="페이지-1" id="H8ZABoYVW6m2O9V8EuZD">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="xTxOeVtpsHyqDIDuPQjX-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;span style=&quot;background-color: rgb(236, 236, 236);&quot;&gt;&amp;nbsp;Hardware Interface&lt;/span&gt;&lt;div style=&quot;background-color: rgb(236, 236, 236);&quot;&gt;Node&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="300" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="xTxOeVtpsHyqDIDuPQjX-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="60" width="120" x="90" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="xTxOeVtpsHyqDIDuPQjX-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="" vertex="1">
+          <mxGeometry height="710" width="790" x="20" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-25" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="190" width="160" x="70" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-4" parent="XJ1FKROc-rWwhB3bfA-v-25" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Update&lt;/div&gt;IMU Data Latch" vertex="1">
+          <mxGeometry height="95" width="160" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-11" edge="1" parent="XJ1FKROc-rWwhB3bfA-v-25" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="79.44" as="sourcePoint" />
+            <mxPoint x="79.44" y="95" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-12" connectable="0" parent="XJ1FKROc-rWwhB3bfA-v-11" style="edgeLabel;resizable=0;html=1;;align=center;verticalAlign=middle;" value="&lt;span style=&quot;text-align: left;&quot;&gt;IMU&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;text-align: left;&quot;&gt;angular Velocity&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="-5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-13" connectable="0" parent="XJ1FKROc-rWwhB3bfA-v-11" style="edgeLabel;resizable=0;html=1;;align=left;verticalAlign=bottom;" value="IMU Node" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="-29" y="-20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-30" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="200" width="170" x="520" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-7" parent="XJ1FKROc-rWwhB3bfA-v-30" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;Update&lt;/div&gt;Velocity Command Data Latch" vertex="1">
+          <mxGeometry height="100" width="160" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-22" edge="1" parent="XJ1FKROc-rWwhB3bfA-v-30" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="79.44000000000005" as="sourcePoint" />
+            <mxPoint x="79.44000000000005" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-41" connectable="0" parent="XJ1FKROc-rWwhB3bfA-v-22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Velocity&lt;div&gt;Command&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.0678" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-43" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};size=0;rotation=90;" value="" vertex="1">
+          <mxGeometry height="730" width="100" x="340" y="-65" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-45" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;rotation=0;" value="Asynchronous&lt;div&gt;Data Update&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="170" x="650" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-52" edge="1" parent="1" source="XJ1FKROc-rWwhB3bfA-v-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="XJ1FKROc-rWwhB3bfA-v-50">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-46" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Read data from Latch &amp;amp; Build Observation" vertex="1">
+          <mxGeometry height="60" width="580" x="70" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-61" edge="1" parent="1" source="XJ1FKROc-rWwhB3bfA-v-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="XJ1FKROc-rWwhB3bfA-v-60">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-50" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Policy Inference&lt;div&gt;(C++ Policy Driver SDK)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="580" x="70" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-53" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};size=0;rotation=90;" value="" vertex="1">
+          <mxGeometry height="730" width="100" x="340" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-59" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;rotation=0;" value="&lt;div&gt;Inference Loop&lt;/div&gt;[ 50 Hz ]" vertex="1">
+          <mxGeometry height="90" width="180" x="630" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-60" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Request RSU IK solve&lt;div&gt;(RSU solver node compute Target actuator position from given inferenced universial joint position)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="580" x="70" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-62" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;rotation=0;" value="&lt;div&gt;Hardware Control Loop&lt;/div&gt;[ 100 Hz ]" vertex="1">
+          <mxGeometry height="90" width="180" x="630" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-65" edge="1" parent="1" source="XJ1FKROc-rWwhB3bfA-v-63" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="XJ1FKROc-rWwhB3bfA-v-64">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-63" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Read data from Latch &amp;amp; Update Current Target Position" vertex="1">
+          <mxGeometry height="70" width="580" x="70" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-64" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Build Motor Packit" vertex="1">
+          <mxGeometry height="70" width="580" x="70" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-68" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="xTxOeVtpsHyqDIDuPQjX-10" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="359.71" y="810" as="sourcePoint" />
+            <mxPoint x="360" y="930" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-69" connectable="0" parent="XJ1FKROc-rWwhB3bfA-v-68" style="edgeLabel;resizable=0;html=1;;align=center;verticalAlign=middle;" value="Control Hardware" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="xTxOeVtpsHyqDIDuPQjX-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;span style=&quot;font-size: 11px; text-align: left; text-wrap-mode: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;RSU&amp;nbsp;&lt;/span&gt;&lt;div style=&quot;font-size: 11px; text-align: left; text-wrap-mode: nowrap;&quot;&gt;Solver&amp;nbsp;&lt;/div&gt;&lt;div style=&quot;font-size: 11px; text-align: left; text-wrap-mode: nowrap;&quot;&gt;Node&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="380" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="QFyDmS10MSEiOzu-AGH5-1" edge="1" parent="1" source="xTxOeVtpsHyqDIDuPQjX-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="xTxOeVtpsHyqDIDuPQjX-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="&lt;div&gt;Update&lt;/div&gt;Actuator Status Data Latch" vertex="1">
+          <mxGeometry height="100" width="200" x="270" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-19" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="306" y="70" as="sourcePoint" />
+            <mxPoint x="306" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-20" connectable="0" parent="XJ1FKROc-rWwhB3bfA-v-19" style="edgeLabel;resizable=0;html=1;;align=center;verticalAlign=middle;" value="&lt;div&gt;&lt;span style=&quot;font-size: 12px; text-wrap-mode: wrap; background-color: rgb(236, 236, 236);&quot;&gt;Current&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;font-size: 12px; text-wrap-mode: wrap; background-color: rgb(236, 236, 236);&quot;&gt;Actuator&amp;nbsp;&lt;/span&gt;&lt;div style=&quot;font-size: 12px; text-wrap-mode: wrap; background-color: rgb(236, 236, 236);&quot;&gt;q,&amp;nbsp;q̇&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-6" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-21" connectable="0" parent="XJ1FKROc-rWwhB3bfA-v-19" style="edgeLabel;resizable=0;html=1;;align=left;verticalAlign=bottom;" value="&lt;span class=&quot;Yjhzub&quot; data-sfc-cb=&quot;&quot; data-processed=&quot;true&quot; style=&quot;font-weight: bolder; color: rgb(10, 10, 10); font-family: Arial, sans-serif; font-size: 16px; text-wrap-mode: wrap;&quot;&gt;&lt;span class=&quot;mTEjhd&quot; data-sfc-cb=&quot;&quot; data-processed=&quot;true&quot; style=&quot;display: inline;&quot;&gt;&lt;span class=&quot;dteT0b&quot; data-processed=&quot;true&quot; style=&quot;font-size: 1.15em;&quot;&gt;&lt;div data-xpm-copy-root=&quot;&quot; data-processed=&quot;true&quot; style=&quot;position: relative; direction: ltr; display: inline-block;&quot;&gt;&lt;img aria-hidden=&quot;true&quot; data-xpm-latex=&quot;q&quot; draggable=&quot;false&quot; role=&quot;presentation&quot; src=&quot;data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==&quot; data-imglogged=&quot;true&quot; data-processed=&quot;true&quot; style=&quot;pointer-events: none; position: absolute; height: 23.9931px; width: 8.42014px; left: 0px; top: 0px;&quot;&gt;&lt;div data-processed=&quot;true&quot; style=&quot;inset: 0px; opacity: 0.001; overflow: hidden; position: absolute; user-select: none;&quot;&gt;&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot;&gt;&lt;/math&gt;&lt;/div&gt;&lt;/div&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;div&gt;&lt;span class=&quot;Yjhzub&quot; data-sfc-cb=&quot;&quot; data-processed=&quot;true&quot; style=&quot;font-weight: bolder; color: rgb(10, 10, 10); font-family: Arial, sans-serif; font-size: 16px; text-wrap-mode: wrap;&quot;&gt;&lt;span class=&quot;mTEjhd&quot; data-sfc-cb=&quot;&quot; data-processed=&quot;true&quot; style=&quot;display: inline;&quot;&gt;&lt;span class=&quot;dteT0b&quot; data-processed=&quot;true&quot; style=&quot;font-size: 1.15em;&quot;&gt;&lt;div data-xpm-copy-root=&quot;&quot; data-processed=&quot;true&quot; style=&quot;position: relative; direction: ltr; display: inline-block;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-31" connectable="0" parent="XJ1FKROc-rWwhB3bfA-v-19" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0215" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-26" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+            <mxPoint x="389.89" y="80" as="sourcePoint" />
+            <mxPoint x="389.38" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="XJ1FKROc-rWwhB3bfA-v-27" connectable="0" parent="XJ1FKROc-rWwhB3bfA-v-26" style="edgeLabel;resizable=0;html=1;;align=center;verticalAlign=middle;" value="&lt;div&gt;&lt;span style=&quot;background-color: rgb(236, 236, 236);&quot;&gt;Current&lt;/span&gt;&lt;/div&gt;&lt;span style=&quot;background-color: rgb(236, 236, 236);&quot;&gt;universial&lt;/span&gt;&lt;div&gt;joints&lt;br&gt;&lt;div&gt;&lt;div style=&quot;text-wrap-mode: wrap; font-size: 12px; background-color: rgb(236, 236, 236);&quot;&gt;q,&amp;nbsp;q̇&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="xTxOeVtpsHyqDIDuPQjX-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&amp;nbsp;Hardware Interface&lt;div&gt;Node&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="230" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="xTxOeVtpsHyqDIDuPQjX-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Task&lt;div&gt;Planner&lt;/div&gt;&lt;div&gt;Node&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="540" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="QFyDmS10MSEiOzu-AGH5-4" edge="1" parent="1" source="xTxOeVtpsHyqDIDuPQjX-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="450" y="170" />
+            </Array>
+            <mxPoint x="450" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QFyDmS10MSEiOzu-AGH5-5" connectable="0" parent="QFyDmS10MSEiOzu-AGH5-4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Target&amp;nbsp;&lt;div&gt;RSU&lt;br&gt;&lt;div&gt;actuator&amp;nbsp;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: rgb(236, 236, 236); font-size: 12px; text-wrap-mode: wrap; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;q&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0782" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

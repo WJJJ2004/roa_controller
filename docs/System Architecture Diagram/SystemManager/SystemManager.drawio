@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="29.6.1">
+  <diagram name="페이지-1" id="28HPx9F7af9odX7wBlNK">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-7" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="230" y="245" as="sourcePoint" />
+            <mxPoint x="370" y="245" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-8" connectable="0" parent="UTARCxAzqq7yQX5tVE5H-7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;pre class=&quot;overflow-visible! px-0!&quot; data-start=&quot;530&quot; data-end=&quot;797&quot;&gt;&lt;div class=&quot;relative w-full mt-4 mb-1&quot;&gt;&lt;div class=&quot;&quot;&gt;&lt;div class=&quot;relative&quot;&gt;&lt;div class=&quot;h-full min-h-0 min-w-0&quot;&gt;&lt;div class=&quot;h-full min-h-0 min-w-0&quot;&gt;&lt;div class=&quot;border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl&quot;&gt;&lt;div class=&quot;h-full w-full border-radius-3xl bg-token-bg-elevated-secondary corner-superellipse/1.1 overflow-clip rounded-3xl lxnfua_clipPathFallback&quot;&gt;&lt;div class=&quot;pe-11 pt-3&quot;&gt;&lt;div class=&quot;relative z-0 flex max-w-full&quot;&gt;&lt;div id=&quot;code-block-viewer&quot; dir=&quot;ltr&quot; class=&quot;q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16&quot;&gt;&lt;div class=&quot;cm-scroller&quot;&gt;&lt;div class=&quot;cm-content q9tKkq_readonly&quot;&gt;controller &lt;/div&gt;&lt;div class=&quot;cm-content q9tKkq_readonly&quot;&gt;active&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/pre&gt;&lt;p data-start=&quot;799&quot; data-end=&quot;811&quot;&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.2333" y="1" as="geometry">
+            <mxPoint x="-16" y="-34" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noH6nnImRJ0EPMkJzrJA-5" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="BOOT" vertex="1">
+          <mxGeometry height="280" width="200" x="30" y="110" as="geometry">
+            <mxRectangle height="30" width="140" x="314" y="185" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noH6nnImRJ0EPMkJzrJA-18" parent="noH6nnImRJ0EPMkJzrJA-5" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;BOOT&lt;/h1&gt;&lt;div&gt;Actions&lt;br&gt;1. Wait lifecycle services&lt;br&gt;2. Configure controller node&lt;br&gt;3. Wait controller status ready&lt;br&gt;4. Activate controller node&lt;/div&gt;&lt;div&gt;5. boot HW with initial pos&lt;br&gt;&lt;br&gt;Monitoring&lt;br&gt;- /controller/status topic&lt;br&gt;- ready&lt;br&gt;- rt_ok&lt;/div&gt;" vertex="1">
+          <mxGeometry height="220" width="170" x="15" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-26" edge="1" parent="1" source="noH6nnImRJ0EPMkJzrJA-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="noH6nnImRJ0EPMkJzrJA-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-27" connectable="0" parent="UTARCxAzqq7yQX5tVE5H-26" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="controller unhealthy&lt;br&gt;critical fault" vertex="1">
+          <mxGeometry relative="1" x="-0.2475" as="geometry">
+            <mxPoint x="27" y="-30" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noH6nnImRJ0EPMkJzrJA-8" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="RUN" vertex="1">
+          <mxGeometry height="280" width="210" x="370" y="110" as="geometry">
+            <mxRectangle height="30" width="140" x="314" y="185" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noH6nnImRJ0EPMkJzrJA-19" parent="noH6nnImRJ0EPMkJzrJA-8" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;RUN&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;1. Activate control loop&lt;/span&gt;&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255)); font-size: 12px; font-weight: normal;&quot;&gt;2. Control HW&lt;/span&gt;&lt;/h1&gt;3. Using RT data in inference" vertex="1">
+          <mxGeometry height="200" width="180" x="10" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-22" edge="1" parent="1" source="noH6nnImRJ0EPMkJzrJA-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="531.3333333333334" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-23" connectable="0" parent="UTARCxAzqq7yQX5tVE5H-22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="status recovered" vertex="1">
+          <mxGeometry relative="1" x="-0.1264" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-24" edge="1" parent="1" source="noH6nnImRJ0EPMkJzrJA-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="noH6nnImRJ0EPMkJzrJA-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-25" connectable="0" parent="UTARCxAzqq7yQX5tVE5H-24" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&lt;pre class=&quot;overflow-visible! px-0!&quot; data-start=&quot;1769&quot; data-end=&quot;2032&quot;&gt;&lt;div class=&quot;relative w-full mt-4 mb-1&quot;&gt;&lt;div class=&quot;&quot;&gt;&lt;div class=&quot;relative&quot;&gt;&lt;div class=&quot;h-full min-h-0 min-w-0&quot;&gt;&lt;div class=&quot;h-full min-h-0 min-w-0&quot;&gt;&lt;div class=&quot;border border-token-border-light border-radius-3xl corner-superellipse/1.1 rounded-3xl&quot;&gt;&lt;div class=&quot;h-full w-full border-radius-3xl bg-token-bg-elevated-secondary corner-superellipse/1.1 overflow-clip rounded-3xl lxnfua_clipPathFallback&quot;&gt;&lt;div class=&quot;pe-11 pt-3&quot;&gt;&lt;div class=&quot;relative z-0 flex max-w-full&quot;&gt;&lt;div id=&quot;code-block-viewer&quot; dir=&quot;ltr&quot; class=&quot;q9tKkq_viewer cm-editor z-10 light:cm-light dark:cm-light flex h-full w-full flex-col items-stretch ͼs ͼ16&quot;&gt;&lt;div class=&quot;cm-scroller&quot;&gt;&lt;div class=&quot;cm-content q9tKkq_readonly&quot;&gt;timeout exceeded&lt;br&gt;critical fault&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;/pre&gt;&lt;p data-start=&quot;2034&quot; data-end=&quot;2039&quot;&gt;&lt;/p&gt;" vertex="1">
+          <mxGeometry relative="1" x="0.0357" as="geometry">
+            <mxPoint y="-40" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noH6nnImRJ0EPMkJzrJA-9" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="SAFE_HOLD" vertex="1">
+          <mxGeometry height="260" width="215" x="370" y="520" as="geometry">
+            <mxRectangle height="30" width="140" x="314" y="185" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noH6nnImRJ0EPMkJzrJA-20" parent="noH6nnImRJ0EPMkJzrJA-9" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;SAFE_HOLD&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;&lt;div style=&quot;font-size: 12px; font-weight: 400;&quot;&gt;Actions&lt;br&gt;1. Deactivate controller&lt;br&gt;2. Stop active control&lt;br&gt;3. Keep system alive&lt;br&gt;&lt;br&gt;Monitoring&lt;br&gt;- status recovery&lt;br&gt;- rt_ok recovery&lt;/div&gt;&lt;/h1&gt;" vertex="1">
+          <mxGeometry height="195" width="190" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-4" edge="1" parent="noH6nnImRJ0EPMkJzrJA-9" source="noH6nnImRJ0EPMkJzrJA-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="noH6nnImRJ0EPMkJzrJA-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-6" edge="1" parent="noH6nnImRJ0EPMkJzrJA-9" source="noH6nnImRJ0EPMkJzrJA-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="noH6nnImRJ0EPMkJzrJA-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="noH6nnImRJ0EPMkJzrJA-10" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="ESTOP" vertex="1">
+          <mxGeometry height="260" width="210" x="720" y="520" as="geometry">
+            <mxRectangle height="30" width="140" x="314" y="185" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noH6nnImRJ0EPMkJzrJA-21" parent="noH6nnImRJ0EPMkJzrJA-10" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;ESTOP&lt;/h1&gt;&lt;div&gt;Actions&lt;br&gt;1. Disable actuator torque&lt;br&gt;2. Stop control loop&lt;br&gt;3. Lock system&lt;br&gt;&lt;br&gt;Recovery&lt;br&gt;Manual reset required&lt;/div&gt;" vertex="1">
+          <mxGeometry height="195" width="180" x="10" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-20" edge="1" parent="1" source="noH6nnImRJ0EPMkJzrJA-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="423" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UTARCxAzqq7yQX5tVE5H-21" connectable="0" parent="UTARCxAzqq7yQX5tVE5H-20" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="RT data read fail&lt;br&gt;status stale" vertex="1">
+          <mxGeometry relative="1" x="0.0592" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
