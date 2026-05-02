@@ -348,7 +348,7 @@ void SystemManagerNode::publishInitPosIfNeeded(const rclcpp::Time& now_time)
 
 void SystemManagerNode::publish_init_pos()
 {
-  auto msg = roa_controller_node::PacketManager::build(init_pos_, this->now(), "INIT POS HOLD");
+  auto msg = roa_packet_manager::PacketManager::build(init_pos_, this->now(), "INIT POS HOLD");
   init_pos_pub_->publish(msg);
 }
 

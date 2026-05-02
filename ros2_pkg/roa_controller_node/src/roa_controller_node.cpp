@@ -458,9 +458,9 @@ bool RoaControllerNode::build_observation(const rclcpp::Time& tnow)
     // return false;
   }
   else {
-    PacketManager::HardwareState hw{};
+    roa_packet_manager::PacketManager::HardwareState hw{};
     std::string hw_error;
-    if (!PacketManager::decode_motor_state(*motor_state_msg, hw, &hw_error)) {
+    if (!roa_packet_manager::PacketManager::decode_motor_state(*motor_state_msg, hw, &hw_error)) {
       RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000,
         "[BuildObs] MotorState decode failed: %s", hw_error.c_str());
       return false;
@@ -746,7 +746,7 @@ void RoaControllerNode::ControlLoop()
   const auto tnow = now();
 
   // latest non-RSU command snapshot
-  PacketManager::Command12Dof cmd;
+  roa_packet_manager::PacketManager::Command12Dof cmd;
   {
     std::lock_guard<std::mutex> lk(cmd_m_);
     cmd = motor_cmd;
@@ -791,13 +791,13 @@ void RoaControllerNode::ControlLoop()
 
 
   if (control_mode_ == CONTROL_MODE::RT_CONTROL) {
-    auto msg = PacketManager::build(cmd, this->now(), "/CTRL/RT_CONTROL");
+    auto msg = roa_packet_manager::PacketManager::build(cmd, this->now(), "/CTRL/RT_CONTROL");
     motor_packit_pub_->publish(msg);
   }
   else {
     const auto init_cmd = setInitPose();
 
-    auto msg = PacketManager::build(init_cmd, this->now(), "/CTRL/DEBUG_MODE");
+    auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/DEBUG_MODE");
     motor_packit_pub_->publish(msg);
 
     printControlDebug(cmd, init_cmd, rsu_ok);
@@ -948,8 +948,8 @@ uint32_t RoaControllerNode::compute_controller_error_code(const rclcpp::Time& tn
 }
 
 void RoaControllerNode::printControlDebug(
-  const PacketManager::Command12Dof& computed_cmd,
-  const PacketManager::Command12Dof& init_cmd,
+  const roa_packet_manager::PacketManager::Command12Dof& computed_cmd,
+  const roa_packet_manager::PacketManager::Command12Dof& init_cmd,
   bool rsu_ok) const
 {
   std::ostringstream oss;

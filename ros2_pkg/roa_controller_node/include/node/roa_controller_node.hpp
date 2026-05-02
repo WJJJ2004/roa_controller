@@ -99,10 +99,10 @@ private:
   bool compute_rt_ok(const rclcpp::Time& tnow) const;
 
 private:
-  PacketManager::Command12Dof
+  roa_packet_manager::PacketManager::Command12Dof
   setInitPose() 
   {  
-    PacketManager::Command12Dof init_pos_{};
+    roa_packet_manager::PacketManager::Command12Dof init_pos_{};
 
     init_pos_.left_hip_pitch   = -HIP_INIT_POS;
     init_pos_.left_hip_roll    = 0.0f;
@@ -243,7 +243,7 @@ private:
   bool build_observation(const rclcpp::Time& tnow);
   // +++++++++++++ MOTOR CONTROL ++++++++++++
 
-  PacketManager::Command12Dof motor_cmd{};
+  roa_packet_manager::PacketManager::Command12Dof motor_cmd{};
   std::array<float, 4>
   initLastSafeRsu()
   {
@@ -303,8 +303,8 @@ private:
     const std::array<float, kActDim>& q_target) const;
 
   void printControlDebug(
-    const PacketManager::Command12Dof& computed_cmd,
-    const PacketManager::Command12Dof& init_cmd,
+    const roa_packet_manager::PacketManager::Command12Dof& computed_cmd,
+    const roa_packet_manager::PacketManager::Command12Dof& init_cmd,
     bool rsu_ok) const;
 };
 
