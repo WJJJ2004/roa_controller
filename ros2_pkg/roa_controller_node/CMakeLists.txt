@@ -14,6 +14,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(roa_interfaces REQUIRED)
 find_package(roa_policy_driver REQUIRED)
+find_package(roa_packet_manager REQUIRED)
 
 add_executable(roa_controller_node
   src/roa_controller_node.cpp
@@ -27,6 +28,7 @@ ament_target_dependencies(roa_controller_node
   geometry_msgs
   std_msgs
   roa_interfaces
+  roa_packet_manager
 )
 
 target_link_libraries(roa_controller_node

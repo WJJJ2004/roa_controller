@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
 find_package(roa_interfaces REQUIRED)
+find_package(roa_packet_manager REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -44,6 +45,7 @@ ament_target_dependencies(system_manager_node
   rclcpp_lifecycle
   lifecycle_msgs
   roa_interfaces
+  roa_packet_manager
 )
 
 target_include_directories(system_manager_node PUBLIC

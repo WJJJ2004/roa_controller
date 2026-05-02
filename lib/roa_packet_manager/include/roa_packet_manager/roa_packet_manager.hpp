@@ -10,7 +10,7 @@
 #include "roa_interfaces/msg/motor_command_array.hpp"
 #include "roa_interfaces/msg/motor_state_array.hpp"
 
-namespace roa_controller_node
+namespace roa_packet_manager
 {
 
 class PacketManager
@@ -232,4 +232,4 @@ private:
 
 };
 
-}  // namespace roa_controller_node
+}  // namespace roa_packet_manager
