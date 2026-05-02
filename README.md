@@ -58,13 +58,14 @@ The controller aggregates sensor inputs, performs policy inference, and generate
 
 ## Repository Structure
 
-| Directory | Description |
-|----------|------------|
-| `lib/roa_policy_driver` | Reinforcement learning policy inference module (ONNX-based) |
-| `msgs/roa_interfaces` | Custom ROS2 message definitions |
-| `ros2_pkg/roa_controller_node` | Main controller node handling inference and command generation |
-| `ros2_pkg/roa_system_manager` | Lifecycle-based system manager and state supervisor |
-| `ros2_pkg/rsu_manager` | RSU solver, estimator, and debugging tools |
+| Directory | Description | Document |
+|----------|------------|----------|
+| `lib/roa_policy_driver` | Reinforcement learning policy inference module (ONNX-based) | [README](./lib/roa_policy_driver/README.md) |
+| `lib/roa_packet_manager` | Packet builder and decoder utilities for ROA motor interfaces. | [README](./lib/roa_packet_manager/README.md) |
+| `msgs/roa_interfaces` | Custom ROS2 message definitions | [README](./msgs/roa_interfaces/README.md) |
+| `ros2_pkg/roa_controller_node` | Main controller node handling inference and command generation | [README](./ros2_pkg/roa_controller_node/README.md) |
+| `ros2_pkg/roa_system_manager` | Lifecycle-based system manager and state supervisor | [README](./ros2_pkg/roa_system_manager/README.md) |
+| `ros2_pkg/rsu_manager` | RSU solver, estimator, and debugging tools | [README](./ros2_pkg/rsu_manager/README.md) |
 
 ---
 
