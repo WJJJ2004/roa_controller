@@ -113,10 +113,33 @@ The RSU system enables accurate ankle control despite complex mechanical linkage
 
 ---
 
-## Build
+## Quick Start
+
+### 1. Clone repository into ROS2 workspace
 
 ```bash
-colcon build --symlink-install
+mkdir -p ~/colcon_ws/src
+cd ~/colcon_ws/src
+
+git clone https://github.com/WJJJ2004/roa_controller.git
+```
+
+---
+
+### 2. Build all components
+
+```bash
+cd ~/colcon_ws
+
+chmod +x src/roa_controller/shell/build_all.sh
+./src/roa_controller/shell/build_all.sh
+```
+
+---
+
+### 3. Source environment
+
+```bash
 source install/setup.bash
 ```
 
