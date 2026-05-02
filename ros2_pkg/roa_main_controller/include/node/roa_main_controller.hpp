@@ -44,7 +44,7 @@
 #define KNEE_PITCH_DEF 0.872665f // 50 degrees
 #define ANKLE_PITCH_DEF 0.523599f // 30 degrees
 
-namespace roa_controller_node
+namespace roa_main_controller
 {
 enum class CONTROL_MODE{
   RT_CONTROL = 0,
@@ -308,4 +308,4 @@ private:
     bool rsu_ok) const;
 };
 
-}  // namespace roa_controller_node
+}  // namespace roa_main_controller

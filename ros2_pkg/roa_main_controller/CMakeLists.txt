@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(roa_controller_node)
+project(roa_main_controller)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -16,11 +16,11 @@ find_package(roa_interfaces REQUIRED)
 find_package(roa_policy_driver REQUIRED)
 find_package(roa_packet_manager REQUIRED)
 
-add_executable(roa_controller_node
-  src/roa_controller_node.cpp
+add_executable(roa_main_controller
+  src/roa_main_controller.cpp
 )
 
-ament_target_dependencies(roa_controller_node
+ament_target_dependencies(roa_main_controller
   rclcpp
   rclcpp_lifecycle
   lifecycle_msgs
@@ -31,11 +31,11 @@ ament_target_dependencies(roa_controller_node
   roa_packet_manager
 )
 
-target_link_libraries(roa_controller_node
+target_link_libraries(roa_main_controller
   roa::roa_policy_driver
 )
 
-target_include_directories(roa_controller_node PUBLIC
+target_include_directories(roa_main_controller PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
@@ -56,7 +56,7 @@ target_include_directories(roa_controller_node PUBLIC
 # )
 
 install(TARGETS
-  roa_controller_node
+  roa_main_controller
   # system_manager_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )

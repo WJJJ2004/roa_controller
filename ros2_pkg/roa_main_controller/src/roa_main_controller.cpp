@@ -25,7 +25,7 @@ ros2 bag record -o rl_debug_run_01 \
   /controller/status \
   /walk_initialized
 */
-#include "node/roa_controller_node.hpp"
+#include "node/roa_main_controller.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -33,13 +33,13 @@ ros2 bag record -o rl_debug_run_01 \
 
 using namespace std::chrono_literals;
 
-namespace roa_controller_node
+namespace roa_main_controller
 {
 RoaControllerNode::RoaControllerNode(const rclcpp::NodeOptions& options)
-: rclcpp_lifecycle::LifecycleNode("roa_controller_node", options)
+: rclcpp_lifecycle::LifecycleNode("roa_main_controller", options)
 {
   RCLCPP_INFO(get_logger(),
-  "roa_controller_node constructed ");
+  "roa_main_controller constructed ");
 }
 
 RoaControllerNode::CallbackReturn
@@ -1047,12 +1047,12 @@ void RoaControllerNode::printInferenceDebug(
   RCLCPP_INFO(get_logger(), "%s", oss.str().c_str());
 }
 
-}  // namespace roa_controller_node
+}  // namespace roa_main_controller
 
 int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
 
-  auto node = std::make_shared<roa_controller_node::RoaControllerNode>();
+  auto node = std::make_shared<roa_main_controller::RoaControllerNode>();
 
   rclcpp::executors::SingleThreadedExecutor exe;
   exe.add_node(node->get_node_base_interface());

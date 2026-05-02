@@ -153,7 +153,7 @@ private:
   double error_log_throttle_sec_{2.0};
 
   std::string controller_status_topic_{"/controller/status"};
-  std::string controller_node_name_{"/roa_controller_node"};
+  std::string controller_node_name_{"/roa_main_controller"};
 
   // top-level FSM
   FsmState current_state_{FsmState::BOOT};

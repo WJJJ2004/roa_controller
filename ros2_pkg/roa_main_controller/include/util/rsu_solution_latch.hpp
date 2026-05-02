@@ -4,7 +4,7 @@
 
 #include <roa_interfaces/msg/rsu_solution.hpp>
 
-namespace roa_controller_node
+namespace roa_main_controller
 {
 
 class RsuSolutionLatch
@@ -44,4 +44,4 @@ private:
   rclcpp::Time rx_time_{0, 0, RCL_ROS_TIME};
 };
 
-}  // namespace roa_controller_node
+}  // namespace roa_main_controller

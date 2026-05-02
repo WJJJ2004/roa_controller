@@ -3,7 +3,7 @@
 #include <mutex>
 #include <utility>
 
-namespace roa_controller_node
+namespace roa_main_controller
 {
 
 template <typename MsgT>
@@ -29,4 +29,4 @@ private:
   rclcpp::Time rx_time_{0, 0, RCL_ROS_TIME};
 };
 
-}  // namespace roa_controller_node
+}  // namespace roa_main_controller

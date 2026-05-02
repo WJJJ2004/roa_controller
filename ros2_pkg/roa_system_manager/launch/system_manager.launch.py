@@ -11,8 +11,8 @@ def generate_launch_description():
 
         # Node(
         #     package=pkg,
-        #     executable="roa_controller_node",
-        #     name="roa_controller_node",
+        #     executable="roa_main_controller",
+        #     name="roa_main_controller",
         #     output="screen",
         #     parameters=[params],
         #     arguments=["--ros-args", "--log-level", "info"],

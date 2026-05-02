@@ -1,4 +1,4 @@
-# roa_controller_node
+# roa_main_controller
 ROS2 RL based Humanoid Bipedal controller
 
 ---

@@ -1,4 +1,4 @@
-roa_controller_node:
+roa_main_controller:
   ros__parameters:
     # 반드시 launch 파일에서 오버라이딩 확인할 것 !!
     # REALTIME_CONTROL_MODE: false
@@ -35,4 +35,4 @@ roa_controller_node:
 #     controller_status_timeout_sec: 0.5
 #     lifecycle_service_timeout_sec: 1.0
 #     controller_status_topic: /controller/status
-#     controller_node_name: /roa_controller_node
+#     controller_node_name: /roa_main_controller

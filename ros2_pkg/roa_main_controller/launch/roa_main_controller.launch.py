@@ -4,15 +4,15 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
-    pkg = "roa_controller_node"
+    pkg = "roa_main_controller"
     params = os.path.join(get_package_share_directory(pkg), "config", "params.yaml")
 
     return LaunchDescription([
 
         Node(
             package=pkg,
-            executable="roa_controller_node",
-            name="roa_controller_node",
+            executable="roa_main_controller",
+            name="roa_main_controller",
             output="screen",
             parameters=[
                 params,
