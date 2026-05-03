@@ -15,6 +15,7 @@ find_package(std_msgs REQUIRED)
 find_package(roa_interfaces REQUIRED)
 find_package(roa_policy_driver REQUIRED)
 find_package(roa_packet_manager REQUIRED)
+find_package(roa_common REQUIRED)
 
 add_executable(roa_main_controller
   src/roa_main_controller.cpp
@@ -29,6 +30,7 @@ ament_target_dependencies(roa_main_controller
   std_msgs
   roa_interfaces
   roa_packet_manager
+  roa_common
 )
 
 target_link_libraries(roa_main_controller

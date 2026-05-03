@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+#                 # ===== RSU IK params =====
+#                 "a_W_mm_flat": [0.0,  36.0, 169.5,  0.0, -36.0, 81.0],
+#                 "b_F_mm_flat": [-30.0, 36.0, 0.0,  -30.0, -36.0, 0.0],
+#                 "c_mm": [30.0, -30.0],
+#                 "r_mm": [169.5, 81.0],
+#                 "psi_rad": [deg2rad(90.0), deg2rad(-90.0)],
+
 import math
 import numpy as np
 
@@ -63,18 +70,18 @@ class RSUCore:
 
         a_W_flat = node.declare_parameter(
             "a_W_mm_flat",
-            [0.0, 36.0, 170.0,
-             0.0, -36.0, 82.0],
+            [0.0, 36.0, 169.5,
+             0.0, -36.0, 81.0],
         ).value
 
         b_F_flat = node.declare_parameter(
             "b_F_mm_flat",
-            [-20.0, 36.0, 16.0,
-             -20.0, -36.0, 16.0],
+            [-30.0, 36.0, 0.0,
+             -30.0, -36.0, 0.0],
         ).value
 
         c_list = node.declare_parameter("c_mm", [30.0, -30.0]).value
-        r_list = node.declare_parameter("r_mm", [154.0, 66.0]).value
+        r_list = node.declare_parameter("r_mm", [169.5, 81.0]).value
         psi_list = node.declare_parameter(
             "psi_rad",
             [deg2rad(90.0), deg2rad(-90.0)],
@@ -124,9 +131,9 @@ class RSUEstimatorFactory:
         self.node = node
         self.solver = solver
 
-        self.jac_lambda = node.declare_parameter("jac_lambda", 1e-6).value
-        self.jac_h = node.declare_parameter("jac_h", 5e-5).value
-        self.beta_jac = node.declare_parameter("beta_jac", 1.0).value
+        self.jac_lambda = node.declare_parameter("jac_lambda", 3e-7).value
+        self.jac_h = node.declare_parameter("jac_h", 1e-4).value
+        self.beta_jac = node.declare_parameter("beta_jac", 0.95).value
         self.vel_lpf_tau = node.declare_parameter("vel_lpf_tau", 0.0).value
         self.motor_vel_lpf_tau = node.declare_parameter("motor_vel_lpf_tau", 0.0).value
 
@@ -145,6 +152,7 @@ class RSUEstimatorFactory:
             lambda_pos=1e-6,
             jac_h=self.jac_h,
             jac_lambda=self.jac_lambda,
+            residual_thresh=1e-3,
             beta_jac=self.beta_jac,
             vel_lpf_tau=self.vel_lpf_tau,
             motor_vel_lpf_tau=self.motor_vel_lpf_tau,
@@ -152,6 +160,9 @@ class RSUEstimatorFactory:
             cond_fail=200.0,
             sigma_min_thresh=1e-5,
             q_init=np.array([0.0, 0.0]),
+            hold_last_on_invalid=True,
+            zero_vel_on_invalid=True,
+            qd_limit=np.deg2rad(np.array([300.0, 300.0])),
         )
 
         return RSUStateEstimator(

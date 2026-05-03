@@ -29,20 +29,23 @@
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <rclcpp_lifecycle/lifecycle_publisher.hpp>
 
-// 서있는 자세를 위한 보행 초기 자세 -> 하드웨어 제어의 offset pose 
-#define HIP_INIT_POS 0.418879f
-#define KNEE_INIT_POS 0.698131f
-#define ANKLE_INIT_POS 0.458105f
+#include <roa_common/constants.hpp>
+#include <roa_common/pose.hpp>
 
-// 추론 모델 기준의 초기 자세 -> last action obs의 기준점 
-#define HIP_INIT_INF 0.418879f  // 24.0 degrees
-#define KNEE_INIT_INF 0.698132f // 40.0 degrees
-#define ANKLE_INIT_INF 0.567232f // 32.5 degrees
+// // 서있는 자세를 위한 보행 초기 자세 -> 하드웨어 제어의 offset pose 
+// #define HIP_INIT_POS 0.418879f
+// #define KNEE_INIT_POS 0.698131f
+// #define ANKLE_INIT_POS 0.458105f
 
-// 추론 모델의 상대각도 기준점 -> default anlge
-#define HIP_PITCH_DEF 0.349066f  // 20 degrees 
-#define KNEE_PITCH_DEF 0.872665f // 50 degrees
-#define ANKLE_PITCH_DEF 0.523599f // 30 degrees
+// // 추론 모델 기준의 초기 자세 -> last action obs의 기준점 
+// #define HIP_INIT_INF 0.418879f  // 24.0 degrees
+// #define KNEE_INIT_INF 0.698132f // 40.0 degrees
+// #define ANKLE_INIT_INF 0.567232f // 32.5 degrees
+
+// // 추론 모델의 상대각도 기준점 -> default anlge
+// #define HIP_PITCH_DEF 0.349066f  // 20 degrees 
+// #define KNEE_PITCH_DEF 0.872665f // 50 degrees
+// #define ANKLE_PITCH_DEF 0.523599f // 30 degrees
 
 namespace roa_main_controller
 {
@@ -99,28 +102,28 @@ private:
   bool compute_rt_ok(const rclcpp::Time& tnow) const;
 
 private:
-  roa_packet_manager::PacketManager::Command12Dof
-  setInitPose() 
-  {  
-    roa_packet_manager::PacketManager::Command12Dof init_pos_{};
+  // roa_packet_manager::PacketManager::Command12Dof
+  // setInitPose() 
+  // {  
+  //   roa_packet_manager::PacketManager::Command12Dof init_pos_{};
 
-    init_pos_.left_hip_pitch   = -HIP_INIT_POS;
-    init_pos_.left_hip_roll    = 0.0f;
-    init_pos_.left_hip_yaw     = 0.0f;
-    init_pos_.left_knee_pitch  =  KNEE_INIT_POS;
+  //   init_pos_.left_hip_pitch   = -HIP_INIT_POS;
+  //   init_pos_.left_hip_roll    = 0.0f;
+  //   init_pos_.left_hip_yaw     = 0.0f;
+  //   init_pos_.left_knee_pitch  =  KNEE_INIT_POS;
 
-    init_pos_.right_hip_pitch  =  HIP_INIT_POS;
-    init_pos_.right_hip_roll   = 0.0f;
-    init_pos_.right_hip_yaw    = 0.0f;
-    init_pos_.right_knee_pitch = -KNEE_INIT_POS;
+  //   init_pos_.right_hip_pitch  =  HIP_INIT_POS;
+  //   init_pos_.right_hip_roll   = 0.0f;
+  //   init_pos_.right_hip_yaw    = 0.0f;
+  //   init_pos_.right_knee_pitch = -KNEE_INIT_POS;
 
-    init_pos_.left_rsu_upper   = -ANKLE_INIT_POS;
-    init_pos_.left_rsu_lower   =  ANKLE_INIT_POS;
-    init_pos_.right_rsu_upper  =  ANKLE_INIT_POS;
-    init_pos_.right_rsu_lower  = -ANKLE_INIT_POS;
+  //   init_pos_.left_rsu_upper   = -ANKLE_INIT_POS;
+  //   init_pos_.left_rsu_lower   =  ANKLE_INIT_POS;
+  //   init_pos_.right_rsu_upper  =  ANKLE_INIT_POS;
+  //   init_pos_.right_rsu_lower  = -ANKLE_INIT_POS;
 
-    return init_pos_;
-  }
+  //   return init_pos_;
+  // }
 
   static std::array<float, kActDim>
   make_default_angles()
@@ -128,16 +131,16 @@ private:
     using P = roa::policy::iface::Policy12DofV1;
     std::array<float, P::kActDim> q{};
 
-    q[P::L_HIP_PITCH]    = -HIP_PITCH_DEF;
-    q[P::R_HIP_PITCH]    =  HIP_PITCH_DEF;
+    q[P::L_HIP_PITCH]    = -roa::constants::HIP_PITCH_DEF;
+    q[P::R_HIP_PITCH]    =  roa::constants::HIP_PITCH_DEF;
     q[P::L_HIP_ROLL]     =  0.00f;
     q[P::R_HIP_ROLL]     =  0.00f;
     q[P::L_HIP_YAW]      =  0.00f;
     q[P::R_HIP_YAW]      =  0.00f;
-    q[P::L_KNEE_PITCH]   =  KNEE_PITCH_DEF;
-    q[P::R_KNEE_PITCH]   = -KNEE_PITCH_DEF;
-    q[P::L_ANKLE_PITCH]  = -ANKLE_PITCH_DEF;
-    q[P::R_ANKLE_PITCH]  =  ANKLE_PITCH_DEF;
+    q[P::L_KNEE_PITCH]   =  roa::constants::KNEE_PITCH_DEF;
+    q[P::R_KNEE_PITCH]   = -roa::constants::KNEE_PITCH_DEF;
+    q[P::L_ANKLE_PITCH]  = -roa::constants::ANKLE_PITCH_DEF;
+    q[P::R_ANKLE_PITCH]  =  roa::constants::ANKLE_PITCH_DEF;
     q[P::L_ANKLE_ROLL]   =  0.00f;
     q[P::R_ANKLE_ROLL]   =  0.00f;
 
@@ -154,16 +157,16 @@ private:
     q.fill(0.0f);
   
     
-    // q[P::L_HIP_PITCH]    = -HIP_INIT_INF;
-    // q[P::R_HIP_PITCH]    =  HIP_INIT_INF;
+    // q[P::L_HIP_PITCH]    = -roa::constants::HIP_INIT_INF;
+    // q[P::R_HIP_PITCH]    =  roa::constants::HIP_INIT_INF;
     // q[P::L_HIP_ROLL]     =  0.00f;
     // q[P::R_HIP_ROLL]     =  0.00f;
     // q[P::L_HIP_YAW]      =  0.00f;
     // q[P::R_HIP_YAW]      =  0.00f;
-    // q[P::L_KNEE_PITCH]   =  KNEE_INIT_INF;
-    // q[P::R_KNEE_PITCH]   = -KNEE_INIT_INF;
-    // q[P::L_ANKLE_PITCH]  = -ANKLE_INIT_INF;
-    // q[P::R_ANKLE_PITCH]  =  ANKLE_INIT_INF;
+    // q[P::L_KNEE_PITCH]   =  roa::constants::KNEE_INIT_INF;
+    // q[P::R_KNEE_PITCH]   = -roa::constants::KNEE_INIT_INF;
+    // q[P::L_ANKLE_PITCH]  = -roa::constants::ANKLE_INIT_INF;
+    // q[P::R_ANKLE_PITCH]  =  roa::constants::ANKLE_INIT_INF;
     // q[P::L_ANKLE_ROLL]   =  0.00f;
     // q[P::R_ANKLE_ROLL]   =  0.00f;
 
@@ -249,10 +252,10 @@ private:
   {
     std::array<float, 4> rsu{};
 
-    rsu[0] = -ANKLE_INIT_POS; // left upper
-    rsu[1] =  ANKLE_INIT_POS; // left lower
-    rsu[2] =  ANKLE_INIT_POS; // right upper
-    rsu[3] = -ANKLE_INIT_POS; // right lower
+    rsu[0] = -roa::constants::ANKLE_INIT_POS; // left upper
+    rsu[1] =  roa::constants::ANKLE_INIT_POS; // left lower
+    rsu[2] =  roa::constants::ANKLE_INIT_POS; // right upper
+    rsu[3] = -roa::constants::ANKLE_INIT_POS; // right lower
 
     return rsu;
   }

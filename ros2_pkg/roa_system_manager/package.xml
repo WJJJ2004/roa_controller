@@ -17,6 +17,7 @@
   <depend>lifecycle_msgs</depend>
   <depend>roa_interfaces</depend>
   <depend>roa_packet_manager</depend>
+  <depend>roa_common</depend>
 
 
   <exec_depend>launch</exec_depend>

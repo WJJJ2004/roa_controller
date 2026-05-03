@@ -33,48 +33,25 @@ class RSURtSolverNode(Node):
     """
 
     def __init__(self):
-        super().__init__("rsu_rt_solver_node")
+        super().__init__("rt_solver_node")
 
         self.core = RSUCore(self)
         self.solver = self.core.solver
 
-        self.hold_alpha_on_infeasible = bool(
-            self.declare_parameter("hold_alpha_on_infeasible", True).value
-        )
+        self._declare_and_get_params()
+
+        self.motor_state = {
+            "left_ac1": {"pos": None, "vel": None, "id": self.left_ac1_id},
+            "left_ac2": {"pos": None, "vel": None, "id": self.left_ac2_id},
+            "right_ac1": {"pos": None, "vel": None, "id": self.right_ac1_id},
+            "right_ac2": {"pos": None, "vel": None, "id": self.right_ac2_id},
+        }
+
 
         self._last_seq = None
         self._last_stamp = None
 
         self.prev_alpha_2d = np.zeros((2, 2), dtype=np.float64)
-
-        left_ac1_id = self.declare_parameter("left_ac1_id", 18).value
-        left_ac2_id = self.declare_parameter("left_ac2_id", 20).value
-        right_ac1_id = self.declare_parameter("right_ac1_id", 19).value
-        right_ac2_id = self.declare_parameter("right_ac2_id", 21).value
-
-        self.motor_state = {
-            "left_ac1": {"pos": None, "vel": None, "id": left_ac1_id},
-            "left_ac2": {"pos": None, "vel": None, "id": left_ac2_id},
-            "right_ac1": {"pos": None, "vel": None, "id": right_ac1_id},
-            "right_ac2": {"pos": None, "vel": None, "id": right_ac2_id},
-        }
-
-        self.left_q_seed = np.array(
-            self.declare_parameter("left_q_seed", [0.0, 0.0]).value,
-            dtype=np.float64,
-        )
-        self.right_q_seed = np.array(
-            self.declare_parameter("right_q_seed", [0.0, 0.0]).value,
-            dtype=np.float64,
-        )
-        self.left_alpha_seed = np.array(
-            self.declare_parameter("left_alpha_seed", [0.0, 0.0]).value,
-            dtype=np.float64,
-        )
-        self.right_alpha_seed = np.array(
-            self.declare_parameter("right_alpha_seed", [0.0, 0.0]).value,
-            dtype=np.float64,
-        )
 
         estimator_factory = RSUEstimatorFactory(self, self.solver)
 
@@ -94,9 +71,6 @@ class RSURtSolverNode(Node):
 
         self._last_motor_state_stamp_ns = None
         self._rsu_state_seq = 0
-        self.rsu_state_frame_id = str(
-            self.declare_parameter("rsu_state_frame_id", "base_link").value
-        )
 
         rsu_qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
@@ -136,6 +110,51 @@ class RSURtSolverNode(Node):
             "RSU RT Solver started.\n"
             "Subscribing /rsu/target and /hardware_interface/state.\n"
             "Publishing /rsu/solution and /rsu/state."
+        )
+        
+    def _declare_and_get_params(self):
+        self.hold_alpha_on_infeasible = bool(
+            self.declare_parameter("hold_alpha_on_infeasible", True).value
+        )
+
+        self.left_ac1_id = int(self.declare_parameter("left_ac1_id", 18).value)
+        self.left_ac2_id = int(self.declare_parameter("left_ac2_id", 20).value)
+        self.right_ac1_id = int(self.declare_parameter("right_ac1_id", 19).value)
+        self.right_ac2_id = int(self.declare_parameter("right_ac2_id", 21).value)
+
+        self.left_q_seed = np.array(
+            self.declare_parameter("left_q_seed", [0.0, 0.0]).value,
+            dtype=np.float64,
+        )
+        self.right_q_seed = np.array(
+            self.declare_parameter("right_q_seed", [0.0, 0.0]).value,
+            dtype=np.float64,
+        )
+        self.left_alpha_seed = np.array(
+            self.declare_parameter("left_alpha_seed", [0.0, 0.0]).value,
+            dtype=np.float64,
+        )
+        self.right_alpha_seed = np.array(
+            self.declare_parameter("right_alpha_seed", [0.0, 0.0]).value,
+            dtype=np.float64,
+        )
+
+        self.rsu_state_frame_id = str(
+            self.declare_parameter("rsu_state_frame_id", "base_link").value
+        )
+
+        self.get_logger().info(
+            "\n[RT Solver Params]\n"
+            f"  hold_alpha_on_infeasible: {self.hold_alpha_on_infeasible}\n"
+            f"  left_ac1_id: {self.left_ac1_id}\n"
+            f"  left_ac2_id: {self.left_ac2_id}\n"
+            f"  right_ac1_id: {self.right_ac1_id}\n"
+            f"  right_ac2_id: {self.right_ac2_id}\n"
+            f"  left_q_seed: {self.left_q_seed.tolist()}\n"
+            f"  right_q_seed: {self.right_q_seed.tolist()}\n"
+            f"  left_alpha_seed: {self.left_alpha_seed.tolist()}\n"
+            f"  right_alpha_seed: {self.right_alpha_seed.tolist()}\n"
+            f"  rsu_state_frame_id: {self.rsu_state_frame_id}"
         )
 
     def _accept_target_order(self, seq: int, stamp) -> bool:
@@ -337,21 +356,23 @@ class RSURtSolverNode(Node):
 
         if (not left_state.valid) or (not right_state.valid):
             self.get_logger().warn(
-                "[RSU estimator] invalid state | "
-                f"L(feasible={left_state.feasible}, valid={left_state.valid}, "
-                f"res={left_state.residual_norm:.3e}, cond={left_state.condJ:.3f}, "
-                f"sigma_min={left_state.sigma_min:.3e}) | "
-                f"R(feasible={right_state.feasible}, valid={right_state.valid}, "
-                f"res={right_state.residual_norm:.3e}, cond={right_state.condJ:.3f}, "
-                f"sigma_min={right_state.sigma_min:.3e})"
+            "[RSU estimator] invalid state | "
+            f"L(feasible={left_state.feasible}, valid={left_state.valid}, "
+            f"res={left_state.residual_norm:.3e}, cond={left_state.condJ:.3f}, "
+            f"sigma_min={left_state.sigma_min:.3e}) | "
+            f"R(feasible={right_state.feasible}, valid={right_state.valid}, "
+            f"res={right_state.residual_norm:.3e}, cond={right_state.condJ:.3f}, "
+            f"sigma_min={right_state.sigma_min:.3e})",
+            throttle_duration_sec=0.5
             )
         elif left_state.degraded or right_state.degraded:
             self.get_logger().warn(
-                "[RSU estimator] degraded state | "
-                f"L(res={left_state.residual_norm:.3e}, cond={left_state.condJ:.3f}, "
-                f"sigma_min={left_state.sigma_min:.3e}) | "
-                f"R(res={right_state.residual_norm:.3e}, cond={right_state.condJ:.3f}, "
-                f"sigma_min={right_state.sigma_min:.3e})"
+            "[RSU estimator] degraded state | "
+            f"L(res={left_state.residual_norm:.3e}, cond={left_state.condJ:.3f}, "
+            f"sigma_min={left_state.sigma_min:.3e}) | "
+            f"R(res={right_state.residual_norm:.3e}, cond={right_state.condJ:.3f}, "
+            f"sigma_min={right_state.sigma_min:.3e})",
+            throttle_duration_sec=0.5
             )
 
     def _estimate_one_foot(self, estimator, motor_pos, motor_vel, dt, mirror=False):

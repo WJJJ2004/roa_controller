@@ -46,7 +46,7 @@ RoaControllerNode::CallbackReturn
 RoaControllerNode::on_configure(const rclcpp_lifecycle::State &)
 {
   is_activate = false;
-  motor_cmd = setInitPose();
+  motor_cmd = roa::common::make_init_pose();
   RCLCPP_INFO(get_logger(), "[Lifecycle] on_configure()");
 
   declareAndLoadParams();
@@ -795,7 +795,7 @@ void RoaControllerNode::ControlLoop()
     motor_packit_pub_->publish(msg);
   }
   else {
-    const auto init_cmd = setInitPose();
+    const auto init_cmd = roa::common::make_init_pose();
 
     auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/DEBUG_MODE");
     motor_packit_pub_->publish(msg);

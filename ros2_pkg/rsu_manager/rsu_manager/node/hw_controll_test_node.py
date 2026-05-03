@@ -256,6 +256,12 @@ class RsuHwGamepadTestNode(Node):
             f"[RSU ERROR THRESHOLD EXCEEDED] {', '.join(large_errors)}",
             throttle_duration_sec=0.5,
             )
+        else :
+            self.get_logger().info(
+                f"RSU error within threshold. roll_err=({err_l_roll:+.4f}, {err_r_roll:+.4f}), "
+                f"pitch_err=({err_l_pitch:+.4f}, {err_r_pitch:+.4f})",
+                throttle_duration_sec=0.5,
+            )
 
     def on_rsu_solution(self, msg: RsuSolution):
         if not msg.feasible:

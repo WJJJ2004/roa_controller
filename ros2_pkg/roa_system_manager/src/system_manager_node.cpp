@@ -7,12 +7,12 @@
 
 using namespace std::chrono_literals;
 
-namespace
-{
-constexpr float DEG_20 = 0.349066f;
-constexpr float DEG_30 = 0.523599f;
-constexpr float DEG_50 = 0.872665f;
-}  // namespace
+// namespace
+// {
+// constexpr float DEG_20 = 0.349066f;
+// constexpr float DEG_30 = 0.523599f;
+// constexpr float DEG_50 = 0.872665f;
+// }  // namespace
 
 namespace system_manager
 {
@@ -58,20 +58,20 @@ void SystemManagerNode::declareAndLoadParams()
     this->declare_parameter<std::string>("controller_node_name", controller_node_name_);
 
   // init pose preset
-  init_pos_.left_hip_pitch   = -DEG_20;
-  init_pos_.left_hip_roll    = 0.0f;
-  init_pos_.left_hip_yaw     = 0.0f;
-  init_pos_.left_knee_pitch  =  DEG_50;
+  // init_pos_.left_hip_pitch   = -DEG_20;
+  // init_pos_.left_hip_roll    = 0.0f;
+  // init_pos_.left_hip_yaw     = 0.0f;
+  // init_pos_.left_knee_pitch  =  DEG_50;
 
-  init_pos_.right_hip_pitch  =  DEG_20;
-  init_pos_.right_hip_roll   = 0.0f;
-  init_pos_.right_hip_yaw    = 0.0f;
-  init_pos_.right_knee_pitch = -DEG_50;
+  // init_pos_.right_hip_pitch  =  DEG_20;
+  // init_pos_.right_hip_roll   = 0.0f;
+  // init_pos_.right_hip_yaw    = 0.0f;
+  // init_pos_.right_knee_pitch = -DEG_50;
 
-  init_pos_.left_rsu_upper   =  DEG_30;
-  init_pos_.left_rsu_lower   = -DEG_30;
-  init_pos_.right_rsu_upper  = -DEG_30;
-  init_pos_.right_rsu_lower  =  DEG_30;
+  // init_pos_.left_rsu_upper   =  DEG_30;
+  // init_pos_.left_rsu_lower   = -DEG_30;
+  // init_pos_.right_rsu_upper  = -DEG_30;
+  // init_pos_.right_rsu_lower  =  DEG_30;
 }
 
 void SystemManagerNode::setupRosInterfaces()

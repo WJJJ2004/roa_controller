@@ -16,6 +16,9 @@
 #include <roa_interfaces/msg/motor_command.hpp>
 #include <roa_interfaces/msg/motor_command_array.hpp>
 
+#include <roa_common/constants.hpp>
+#include <roa_common/pose.hpp>
+
 namespace system_manager
 {
 
@@ -138,7 +141,9 @@ private:
 
 private:
   bool is_init_pos_done_{false};
-  roa_packet_manager::PacketManager::Command12Dof init_pos_{};
+
+  roa_packet_manager::PacketManager::Command12Dof 
+  init_pos_ = roa::common::make_init_pose();
 
   // rclcpp::Time init_pos_start_time_{0, 0, RCL_ROS_TIME};
   rclcpp::Time last_init_pos_pub_time_{0, 0, RCL_ROS_TIME};

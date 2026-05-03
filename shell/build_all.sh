@@ -36,7 +36,7 @@ cd "${REPO_ROOT}"
 colcon build \
   --build-base "${WS_ROOT}/build" \
   --install-base "${WS_ROOT}/install" \
-  --base-paths msgs ros2_pkg lib/roa_packet_manager \
+  --base-paths msgs ros2_pkg lib/roa_packet_manager lib/roa_common \
   --symlink-install \
   --cmake-args \
     -DCMAKE_BUILD_TYPE=Release \
