@@ -35,6 +35,7 @@ setup(
             'gamepad_rpy_node = rsu_manager.node.gamepad_rpy_node:main',
             'hw_controll_test_node = rsu_manager.node.hw_controll_test_node:main',
             'rsu_link_plotter_node = rsu_manager.node.rsu_link_plotter_node:main',
+            'init_pose_tuning_node = rsu_manager.node.init_pose_tuning_node:main',
         ],
     },
 )

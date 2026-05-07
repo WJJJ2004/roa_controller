@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
 
+"""
+RSU solver and state estimator node for real-time control.
+
+
+TODO
+
+HW TEST랑 SIM2REAL 할때 추정기 시드값이 다른데 이거 launch파일에서 오버라이트하는 걸로 조정
+
+노드단에서 get parameter로 시드값을 받아서 초기화하도록 수정
+
+"""
+
 import os
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
@@ -113,36 +125,73 @@ class RSURtSolverNode(Node):
         )
         
     def _declare_and_get_params(self):
+
+        # =========================
+        # Declare Parameters
+        # =========================
+        self.declare_parameter("hold_alpha_on_infeasible", True)
+
+        self.declare_parameter("left_ac1_id", 18)
+        self.declare_parameter("left_ac2_id", 20)
+        self.declare_parameter("right_ac1_id", 19)
+        self.declare_parameter("right_ac2_id", 21)
+
+        self.declare_parameter("left_q_seed", [0.0, 0.0])
+        self.declare_parameter("right_q_seed", [0.0, 0.0])
+
+        self.declare_parameter("left_alpha_seed", [0.0, 0.0])
+        self.declare_parameter("right_alpha_seed", [0.0, 0.0])
+
+        self.declare_parameter("rsu_state_frame_id", "base_link")
+
+        # =========================
+        # Get Parameters
+        # =========================
         self.hold_alpha_on_infeasible = bool(
-            self.declare_parameter("hold_alpha_on_infeasible", True).value
+            self.get_parameter("hold_alpha_on_infeasible").value
         )
 
-        self.left_ac1_id = int(self.declare_parameter("left_ac1_id", 18).value)
-        self.left_ac2_id = int(self.declare_parameter("left_ac2_id", 20).value)
-        self.right_ac1_id = int(self.declare_parameter("right_ac1_id", 19).value)
-        self.right_ac2_id = int(self.declare_parameter("right_ac2_id", 21).value)
+        self.left_ac1_id = int(
+            self.get_parameter("left_ac1_id").value
+        )
+        self.left_ac2_id = int(
+            self.get_parameter("left_ac2_id").value
+        )
+
+        self.right_ac1_id = int(
+            self.get_parameter("right_ac1_id").value
+        )
+        self.right_ac2_id = int(
+            self.get_parameter("right_ac2_id").value
+        )
 
         self.left_q_seed = np.array(
-            self.declare_parameter("left_q_seed", [0.0, 0.0]).value,
+            self.get_parameter("left_q_seed").value,
             dtype=np.float64,
         )
+
         self.right_q_seed = np.array(
-            self.declare_parameter("right_q_seed", [0.0, 0.0]).value,
+            self.get_parameter("right_q_seed").value,
             dtype=np.float64,
         )
+
         self.left_alpha_seed = np.array(
-            self.declare_parameter("left_alpha_seed", [0.0, 0.0]).value,
+            self.get_parameter("left_alpha_seed").value,
             dtype=np.float64,
         )
+
         self.right_alpha_seed = np.array(
-            self.declare_parameter("right_alpha_seed", [0.0, 0.0]).value,
+            self.get_parameter("right_alpha_seed").value,
             dtype=np.float64,
         )
 
         self.rsu_state_frame_id = str(
-            self.declare_parameter("rsu_state_frame_id", "base_link").value
+            self.get_parameter("rsu_state_frame_id").value
         )
 
+        # =========================
+        # Print Parameters
+        # =========================
         self.get_logger().info(
             "\n[RT Solver Params]\n"
             f"  hold_alpha_on_infeasible: {self.hold_alpha_on_infeasible}\n"
@@ -156,7 +205,7 @@ class RSURtSolverNode(Node):
             f"  right_alpha_seed: {self.right_alpha_seed.tolist()}\n"
             f"  rsu_state_frame_id: {self.rsu_state_frame_id}"
         )
-
+    
     def _accept_target_order(self, seq: int, stamp) -> bool:
         if seq != 0:
             if self._last_seq is None:

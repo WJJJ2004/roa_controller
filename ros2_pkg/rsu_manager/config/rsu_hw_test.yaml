@@ -1,16 +1,18 @@
-# rsu_rt.yaml with RT initial pos seed for HW test (non-neutral pose)
+# rsu_hw_test.yaml with RT initial pos seed for HW test (neutral pose)
 # NOTE:
-# PLEASE CHECK YOUR LAUNCH FILE TO MAKE SURE YOU ARE LOADING THE CORRECT CONFIG (E.G. rsu_hw_test.yaml for HW test with neutral initial seed, rsu_rt.yaml for RT test with non-neutral initial seed), OTHERWISE YOU MIGHT BE STARTING THE SOLVER WITH AN UNINTENDED INITIAL SEED WHICH CAN CAUSE UNEXPECTED BEHAVIOR (E.G. INSTANT LARGE ACTUATOR COMMANDS)
+# PLEASE CHECK YOUR LAUNCH FILE TO MAKE SURE YOU ARE LOADING THIS CONFIG INSTEAD OF rsu_rt.yaml, OTHERWISE YOU MIGHT BE STARTING THE SOLVER WITH A NON-NEUTRAL INITIAL SEED WHICH CAN CAUSE UNEXPECTED BEHAVIOR (E.G. INSTANT LARGE ACTUATOR COMMANDS)
 
 rt_solver_node:
   ros__parameters:
     # ==== RT initial pos seed ====
-    left_q_seed: [0.0, -0.5672320]
-    right_q_seed: [0.0, -0.5672320]
+    # NOTE:
+    # this Value is for netural initial pose
+    left_q_seed: [0.0, 0.0]
+    right_q_seed: [0.0, 0.0]
 
-    left_alpha_seed: [-0.458105, 0.458105]
-    right_alpha_seed: [-0.458105, 0.458105]
-  
+    left_alpha_seed: [0.0, 0.0]
+    right_alpha_seed: [0.0, 0.0]
+
     # ===== Actuator ID Mapping (ID to RSU solver) =====
     left_ac1_id: 18
     left_ac2_id: 20
@@ -43,3 +45,11 @@ rt_solver_node:
     ang_max_deg: 115.0
 
     rsu_state_frame_id: "rsu_state"
+
+
+      # ==== RT initial pos seed ====
+    # left_q_seed: [0.0, -0.5672320]
+    # right_q_seed: [0.0, -0.5672320]
+
+    # left_alpha_seed: [-0.458105, 0.458105]
+    # right_alpha_seed: [-0.458105, 0.458105]

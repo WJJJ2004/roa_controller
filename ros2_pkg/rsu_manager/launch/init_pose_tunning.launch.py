@@ -6,7 +6,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     pkg = FindPackageShare("rsu_manager")
-    param_file = PathJoinSubstitution([pkg, "config", "rsu_hw_test.yaml"])
+    param_file = PathJoinSubstitution([pkg, "config", "rsu_rt.yaml"])
 
     return LaunchDescription([
         Node(
@@ -21,9 +21,9 @@ def generate_launch_description():
         ),
         Node(
                 package="rsu_manager",
-                executable="hw_controll_test_node",
-                name="hw_controll_test_node",
+                executable="init_pose_tuning_node",
+                name="init_pose_tuning_node",
                 output="screen",
-                arguments=["--ros-args", "--log-level", "info"],
+                arguments=["--ros-args", "--log-level", "warn"],
         ),
     ])

@@ -68,24 +68,20 @@ class RSUCore:
     def __init__(self, node):
         self.node = node
 
-        a_W_flat = node.declare_parameter(
-            "a_W_mm_flat",
-            [0.0, 36.0, 169.5,
-             0.0, -36.0, 81.0],
-        ).value
+        a_W_flat =  [
+            0.0, 36.0, 169.5,
+            0.0, -36.0, 81.0
+        ]
+        
+        b_F_flat = [ 
+             -30.0, 36.0, 0.0,
+             -30.0, -36.0, 0.0
+        ]
 
-        b_F_flat = node.declare_parameter(
-            "b_F_mm_flat",
-            [-30.0, 36.0, 0.0,
-             -30.0, -36.0, 0.0],
-        ).value
-
-        c_list = node.declare_parameter("c_mm", [30.0, -30.0]).value
-        r_list = node.declare_parameter("r_mm", [169.5, 81.0]).value
-        psi_list = node.declare_parameter(
-            "psi_rad",
-            [deg2rad(90.0), deg2rad(-90.0)],
-        ).value
+        c_list = [30.0, -30.0]
+        r_list = [169.5, 81.0]
+        psi_list = [deg2rad(90.0), deg2rad(-90.0)]
+        
 
         if len(a_W_flat) != 6:
             raise RuntimeError(f"a_W_mm_flat must have length 6, got {len(a_W_flat)}")
@@ -131,11 +127,11 @@ class RSUEstimatorFactory:
         self.node = node
         self.solver = solver
 
-        self.jac_lambda = node.declare_parameter("jac_lambda", 3e-7).value
-        self.jac_h = node.declare_parameter("jac_h", 1e-4).value
-        self.beta_jac = node.declare_parameter("beta_jac", 0.95).value
-        self.vel_lpf_tau = node.declare_parameter("vel_lpf_tau", 0.0).value
-        self.motor_vel_lpf_tau = node.declare_parameter("motor_vel_lpf_tau", 0.0).value
+        self.jac_lambda = 3e-7
+        self.jac_h = 1e-4
+        self.beta_jac = 0.95
+        self.vel_lpf_tau = 0.0
+        self.motor_vel_lpf_tau = 0.0
 
         node.get_logger().info(
             "RSU Estimator Params:\n"

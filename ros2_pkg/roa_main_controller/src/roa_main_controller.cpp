@@ -736,7 +736,6 @@ void RoaControllerNode::InferenceLoop()
 
 void RoaControllerNode::ControlLoop()
 {
-
   static int loop_count = 0;
   loop_count++;
   if (this->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {

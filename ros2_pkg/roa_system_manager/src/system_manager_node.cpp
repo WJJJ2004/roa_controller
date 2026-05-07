@@ -441,7 +441,7 @@ void SystemManagerNode::handleBoot(const rclcpp::Time& tnow)
         return;
       }
 
-      if (controller_ready_wait_count_ < 1000) {
+      if (controller_ready_wait_count_ < 10000000) {
         ++controller_ready_wait_count_;
       } else {
         RCLCPP_ERROR(
