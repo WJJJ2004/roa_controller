@@ -46,6 +46,14 @@ struct Policy12DofV1 {
     std::array<float, kDof> action{};           // raw policy output
   };
 
+  static inline void fill_zero_obs(Obs& o) noexcept {
+    o.cmd.fill(0.0f);
+    o.q_rel.fill(0.0f);
+    o.qd_rel.fill(0.0f);
+    o.imu_omega_body.fill(0.0f);
+    o.last_action.fill(0.0f);
+  }
+
   // Pack order: cmd(3), q_rel(12), qd_rel(12), imu(3), last_action(12)
   static inline void pack_obs(const Obs& o, float* out36) noexcept {
     float* p = out36;

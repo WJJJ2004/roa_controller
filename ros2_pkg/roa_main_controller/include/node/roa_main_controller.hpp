@@ -307,7 +307,6 @@ private:
 
   void printControlDebug(
     const roa_packet_manager::PacketManager::Command12Dof& computed_cmd,
-    const roa_packet_manager::PacketManager::Command12Dof& init_cmd,
     bool rsu_ok) const;
 };
 

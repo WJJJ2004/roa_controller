@@ -3,13 +3,6 @@
 """
 RSU solver and state estimator node for real-time control.
 
-
-TODO
-
-HW TEST랑 SIM2REAL 할때 추정기 시드값이 다른데 이거 launch파일에서 오버라이트하는 걸로 조정
-
-노드단에서 get parameter로 시드값을 받아서 초기화하도록 수정
-
 """
 
 import os

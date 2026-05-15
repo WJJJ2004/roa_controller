@@ -670,6 +670,8 @@ void RoaControllerNode::publish_rsu_target(
 
 void RoaControllerNode::InferenceLoop()
 {
+  static bool first_run = true;
+
   if (this->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
     return;
   }
@@ -681,7 +683,15 @@ void RoaControllerNode::InferenceLoop()
 
   const auto tnow = now();
 
-  if (!build_observation(tnow)) {
+  // TODO 
+  // THIS IS TEST FOR INITIAL SAFE ACTION
+  if (first_run) {
+    RCLCPP_INFO(get_logger(), "[InferenceLoop] First run - observation buffers initialized with zeros");
+    roa::policy::iface::Policy12DofV1::fill_zero_obs(obs_);
+    roa::policy::iface::Policy12DofV1::pack_obs(obs_, obs_buffer_.data());
+    first_run = false;
+  }
+  else if (!build_observation(tnow)) {
     RCLCPP_WARN_THROTTLE(
       get_logger(), *get_clock(), 2000,
       "[InferenceLoop] Observation build failed");
@@ -709,9 +719,12 @@ void RoaControllerNode::InferenceLoop()
   auto q_target = P::action_to_q_target(
     act_buffer_, default_angles_, action_scale_);
 
-  if (control_mode_ == CONTROL_MODE::DEBUG) {
-    printInferenceDebug(q_target);
-  }
+
+  printInferenceDebug(q_target);
+
+  // if (control_mode_ == CONTROL_MODE::DEBUG) {
+  //   printInferenceDebug(q_target);
+  // }
 
   {
     std::lock_guard<std::mutex> lk(cmd_m_);
@@ -789,6 +802,8 @@ void RoaControllerNode::ControlLoop()
   cmd.right_rsu_lower = last_safe_rsu_[3];
 
 
+  printControlDebug(cmd, rsu_ok);
+
   if (control_mode_ == CONTROL_MODE::RT_CONTROL) {
     auto msg = roa_packet_manager::PacketManager::build(cmd, this->now(), "/CTRL/RT_CONTROL");
     motor_packit_pub_->publish(msg);
@@ -798,8 +813,6 @@ void RoaControllerNode::ControlLoop()
 
     auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/DEBUG_MODE");
     motor_packit_pub_->publish(msg);
-
-    printControlDebug(cmd, init_cmd, rsu_ok);
   }
 }
 
@@ -948,7 +961,6 @@ uint32_t RoaControllerNode::compute_controller_error_code(const rclcpp::Time& tn
 
 void RoaControllerNode::printControlDebug(
   const roa_packet_manager::PacketManager::Command12Dof& computed_cmd,
-  const roa_packet_manager::PacketManager::Command12Dof& init_cmd,
   bool rsu_ok) const
 {
   std::ostringstream oss;
