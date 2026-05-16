@@ -670,8 +670,6 @@ void RoaControllerNode::publish_rsu_target(
 
 void RoaControllerNode::InferenceLoop()
 {
-  static bool first_run = true;
-
   if (this->get_current_state().id() != lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE) {
     return;
   }
@@ -685,11 +683,10 @@ void RoaControllerNode::InferenceLoop()
 
   // TODO 
   // THIS IS TEST FOR INITIAL SAFE ACTION
-  if (first_run) {
+  if (is_infer_first_run_done == false) {
     RCLCPP_INFO(get_logger(), "[InferenceLoop] First run - observation buffers initialized with zeros");
     roa::policy::iface::Policy12DofV1::fill_zero_obs(obs_);
     roa::policy::iface::Policy12DofV1::pack_obs(obs_, obs_buffer_.data());
-    first_run = false;
   }
   else if (!build_observation(tnow)) {
     RCLCPP_WARN_THROTTLE(
@@ -737,6 +734,7 @@ void RoaControllerNode::InferenceLoop()
     motor_cmd.right_hip_yaw    = q_target[P::R_HIP_YAW];
     motor_cmd.left_knee_pitch  = q_target[P::L_KNEE_PITCH];
     motor_cmd.right_knee_pitch = q_target[P::R_KNEE_PITCH];
+
   }
 
   publish_rsu_target(
@@ -745,6 +743,12 @@ void RoaControllerNode::InferenceLoop()
     q_target[P::R_ANKLE_ROLL],
     q_target[P::R_ANKLE_PITCH]
   );
+
+  if (is_infer_first_run_done == false)
+  {
+    is_infer_first_run_done = true;
+    RCLCPP_INFO(get_logger(), "[InferenceLoop] First run complete - policy outputs may now be used in control loop");
+  }
 }
 
 void RoaControllerNode::ControlLoop()
@@ -756,6 +760,17 @@ void RoaControllerNode::ControlLoop()
   }
 
   const auto tnow = now();
+
+  if (is_infer_first_run_done == false) {
+    const auto init_cmd = roa::common::make_init_pose();
+
+    auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/INFERENCE_NOT_READY");
+    motor_packit_pub_->publish(msg);
+    RCLCPP_WARN_THROTTLE(
+      get_logger(), *get_clock(), 2000,
+      "[ControlLoop] Inference not ready. Publishing init pose.");
+    return;
+  }
 
   // latest non-RSU command snapshot
   roa_packet_manager::PacketManager::Command12Dof cmd;
@@ -801,11 +816,10 @@ void RoaControllerNode::ControlLoop()
   cmd.right_rsu_upper = last_safe_rsu_[2];
   cmd.right_rsu_lower = last_safe_rsu_[3];
 
-
   printControlDebug(cmd, rsu_ok);
 
   if (control_mode_ == CONTROL_MODE::RT_CONTROL) {
-    auto msg = roa_packet_manager::PacketManager::build(cmd, this->now(), "/CTRL/RT_CONTROL");
+    auto msg = roa_packet_manager::PacketManager::build(cmd, this->now(), "/CTRL/INFERENCE_CONTROL");
     motor_packit_pub_->publish(msg);
   }
   else {

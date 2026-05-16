@@ -301,6 +301,7 @@ private:
   rclcpp::Duration policy_cmd_timeout_{0, 0};
 
   uint32_t rsu_seq_{0};
+  bool is_infer_first_run_done = false;
 
   void printInferenceDebug(
     const std::array<float, kActDim>& q_target) const;
@@ -308,6 +309,8 @@ private:
   void printControlDebug(
     const roa_packet_manager::PacketManager::Command12Dof& computed_cmd,
     bool rsu_ok) const;
+
+
 };
 
 }  // namespace roa_main_controller
