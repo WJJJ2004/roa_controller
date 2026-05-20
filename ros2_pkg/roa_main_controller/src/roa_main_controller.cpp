@@ -130,6 +130,8 @@ RoaControllerNode::on_activate(const rclcpp_lifecycle::State &)
     return CallbackReturn::FAILURE;
   }
 
+  walk_blend_start_time_ = now();
+  
   if (rsu_target_pub_) {
     rsu_target_pub_->on_activate();
   }
@@ -751,6 +753,48 @@ void RoaControllerNode::InferenceLoop()
   }
 }
 
+static roa_packet_manager::PacketManager::Command12Dof blendCommand(
+  const roa_packet_manager::PacketManager::Command12Dof& init,
+  const roa_packet_manager::PacketManager::Command12Dof& target,
+  float alpha)
+{
+  roa_packet_manager::PacketManager::Command12Dof out = init;
+
+  const float beta = 1.0f - alpha;
+
+  out.left_hip_pitch   = beta * init.left_hip_pitch   + alpha * target.left_hip_pitch;
+  out.right_hip_pitch  = beta * init.right_hip_pitch  + alpha * target.right_hip_pitch;
+  out.left_hip_roll    = beta * init.left_hip_roll    + alpha * target.left_hip_roll;
+  out.right_hip_roll   = beta * init.right_hip_roll   + alpha * target.right_hip_roll;
+  out.left_hip_yaw     = beta * init.left_hip_yaw     + alpha * target.left_hip_yaw;
+  out.right_hip_yaw    = beta * init.right_hip_yaw    + alpha * target.right_hip_yaw;
+  out.left_knee_pitch  = beta * init.left_knee_pitch  + alpha * target.left_knee_pitch;
+  out.right_knee_pitch = beta * init.right_knee_pitch + alpha * target.right_knee_pitch;
+
+  out.left_rsu_upper   = beta * init.left_rsu_upper   + alpha * target.left_rsu_upper;
+  out.left_rsu_lower   = beta * init.left_rsu_lower   + alpha * target.left_rsu_lower;
+  out.right_rsu_upper  = beta * init.right_rsu_upper  + alpha * target.right_rsu_upper;
+  out.right_rsu_lower  = beta * init.right_rsu_lower  + alpha * target.right_rsu_lower;
+
+  return out;
+}
+
+static float computeBlendAlpha(
+  const rclcpp::Time& now_time,
+  const rclcpp::Time& start_time,
+  double duration_sec)
+{
+  if (duration_sec <= 0.0) {
+    return 1.0f;
+  }
+
+  const double elapsed = (now_time - start_time).seconds();
+  const double s = std::clamp(elapsed / duration_sec, 0.0, 1.0);
+
+  return static_cast<float>(s * s);
+}
+
+
 void RoaControllerNode::ControlLoop()
 {
   static int loop_count = 0;
@@ -818,8 +862,25 @@ void RoaControllerNode::ControlLoop()
 
   printControlDebug(cmd, rsu_ok);
 
+
   if (control_mode_ == CONTROL_MODE::RT_CONTROL) {
-    auto msg = roa_packet_manager::PacketManager::build(cmd, this->now(), "/CTRL/INFERENCE_CONTROL");
+    const auto init_cmd = roa::common::make_init_pose();
+
+    const float alpha = walk_blend_enabled_
+      ? computeBlendAlpha(tnow, walk_blend_start_time_, walk_blend_duration_sec_)
+      : 1.0f;
+
+    const auto blended_cmd = blendCommand(init_cmd, cmd, alpha);
+
+    RCLCPP_INFO_THROTTLE(
+      get_logger(), *get_clock(), 500,
+      "[WalkBlend] actuator-space alpha=%.3f", alpha);
+
+    auto msg = roa_packet_manager::PacketManager::build(
+      blended_cmd,
+      this->now(),
+      "/CTRL/INFERENCE_CONTROL_BLEND");
+
     motor_packit_pub_->publish(msg);
   }
   else {
@@ -1071,7 +1132,6 @@ void RoaControllerNode::printInferenceDebug(
 
   RCLCPP_INFO(get_logger(), "%s", oss.str().c_str());
 }
-
 }  // namespace roa_main_controller
 
 int main(int argc, char **argv) {

@@ -125,6 +125,10 @@ private:
   //   return init_pos_;
   // }
 
+  rclcpp::Time walk_blend_start_time_;
+  bool walk_blend_enabled_ = true;
+  double walk_blend_duration_sec_ = 3.0;
+
   static std::array<float, kActDim>
   make_default_angles()
   {
