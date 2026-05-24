@@ -101,12 +101,13 @@ RoaControllerNode::on_configure(const rclcpp_lifecycle::State &)
     oss << "    controller_status        : " << topic_controller_status_ << "\n";
 
     oss << "  policy\n";
-    oss << "    model_path               : " << roa::policy::iface::Policy12DofV1::default_model_path() << "\n";
+    oss << "    model_path               : " << roa::policy::iface::Policy12DofV2::default_model_path() << "\n";
     oss << "    obs_dim                  : " << kObsDim << "\n";
     oss << "    act_dim                  : " << kActDim << "\n";
     oss << "    policy_loaded            : " << (policy_loaded_ ? "true" : "false") << "\n";
 
     oss << "  control semantics\n";
+    oss << "    Action Blend Action      : true\n";
     oss << "    ankle_obs_source         : virtual RSU joint state (/rsu/state)\n";
     oss << "    ankle_target_space       : virtual ankle joint target\n";
     oss << "    ankle_actuator_source    : RSU solver output (/rsu/solution)\n";
@@ -350,7 +351,7 @@ void RoaControllerNode::declareAndLoadParams()
 bool RoaControllerNode::init_policy()
 {
   roa::policy::Options opt{};
-  using P = roa::policy::iface::Policy12DofV1;
+  using P = roa::policy::iface::Policy12DofV2;
   std::string model_path = P::default_model_path();
 
   if (!driver_.load(model_path, opt)) {
@@ -406,7 +407,25 @@ bool RoaControllerNode::isFreshStamp(
 bool RoaControllerNode::build_observation(const rclcpp::Time& tnow)
 {
 
-  using P = roa::policy::iface::Policy12DofV1;
+  using P = roa::policy::iface::Policy12DofV2;
+
+  // 0) gravity vector
+  auto [gravity_msg, gravity_rx_time] = gravity_latch_.get();
+  const bool gravity_ok =
+    (gravity_msg != nullptr) &&
+    isFreshStamp(tnow, gravity_msg->header.stamp, gravity_timeout_) &&
+    std::isfinite(gravity_msg->vector.x) &&
+    std::isfinite(gravity_msg->vector.y) &&
+    std::isfinite(gravity_msg->vector.z);
+  if (!gravity_ok) {
+    RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000,
+      "[BuildObs] Gravity data stale or invalid. Skipping gravity update in observation.");
+  }
+  else {
+    obs_.gravity[0] = static_cast<float>(gravity_msg->vector.x);
+    obs_.gravity[1] = static_cast<float>(gravity_msg->vector.y);
+    obs_.gravity[2] = static_cast<float>(gravity_msg->vector.z);
+  }
 
   // 1) cmd
   auto [cmd_msg, cmd_rx_time] = cmd_latch_.get();
@@ -519,7 +538,7 @@ bool RoaControllerNode::build_observation(const rclcpp::Time& tnow)
     qd_cur[P::R_ANKLE_ROLL]  = rsu_state_msg->q_dot.right_rsu_roll;
   }
 
-  // using P = roa::policy::iface::Policy12DofV1;
+  // using P = roa::policy::iface::Policy12DofV2;
   // if (motor_state_ok) {
   //   // real encoder state for non-ankle joints
   //   q_cur[P::L_HIP_PITCH]   = hw.left_hip_pitch.position;
@@ -559,7 +578,7 @@ bool RoaControllerNode::build_observation(const rclcpp::Time& tnow)
     obs_.qd_rel[i] = qd_cur[i];
   }
 
-  roa::policy::iface::Policy12DofV1::pack_obs(obs_, obs_buffer_.data());
+  roa::policy::iface::Policy12DofV2::pack_obs(obs_, obs_buffer_.data());
   return true;
 }
 
@@ -687,8 +706,8 @@ void RoaControllerNode::InferenceLoop()
   // THIS IS TEST FOR INITIAL SAFE ACTION
   if (is_infer_first_run_done == false) {
     RCLCPP_INFO(get_logger(), "[InferenceLoop] First run - observation buffers initialized with zeros");
-    roa::policy::iface::Policy12DofV1::fill_zero_obs(obs_);
-    roa::policy::iface::Policy12DofV1::pack_obs(obs_, obs_buffer_.data());
+    roa::policy::iface::Policy12DofV2::fill_zero_obs(obs_);
+    roa::policy::iface::Policy12DofV2::pack_obs(obs_, obs_buffer_.data());
   }
   else if (!build_observation(tnow)) {
     RCLCPP_WARN_THROTTLE(
@@ -714,7 +733,7 @@ void RoaControllerNode::InferenceLoop()
     last_action_[i] = act_buffer_[i];
   }
 
-  using P = roa::policy::iface::Policy12DofV1;
+  using P = roa::policy::iface::Policy12DofV2;
   auto q_target = P::action_to_q_target(
     act_buffer_, default_angles_, action_scale_);
 
