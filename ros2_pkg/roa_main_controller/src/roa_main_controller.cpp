@@ -1104,9 +1104,13 @@ void RoaControllerNode::printInferenceDebug(
   oss << std::fixed << std::setprecision(3);
 
   oss << "\n[DEBUG][INFER]\n";
+  oss << " gravity    = ["
+      << obs_.gravity[0] << ", "
+      << obs_.gravity[1] << ", "
+      << obs_.gravity[2] << "]\n";
   oss << " cmd        = ["
       << obs_.cmd[0] << ", " << obs_.cmd[1] << ", " << obs_.cmd[2] << "]\n";
-  oss << " imu        = ["
+  oss << " imu angvel = ["
       << obs_.imu_omega_body[0] << ", "
       << obs_.imu_omega_body[1] << ", "
       << obs_.imu_omega_body[2] << "]\n";
