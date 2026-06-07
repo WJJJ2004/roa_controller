@@ -24,9 +24,9 @@ def clamp(x, lo, hi):
     return max(lo, min(hi, x))
 
 
-HIP_INIT_POS = 0.418879
-KNEE_INIT_POS = 0.698131
-ANKLE_INIT_POS = 0.458105
+HIP_INIT_POS = 0.5457
+KNEE_INIT_POS = 0.8034
+ANKLE_INIT_POS = 0.4592
 
 
 cmd_qos = QoSProfile(
@@ -50,6 +50,14 @@ state_qos = QoSProfile(
 
 class InitPoseTuningNode(Node):
     def __init__(self):
+        
+        self.kp_scale = 0.6
+        self.kd_scale = 0.3
+        
+        self.rsu_kp_scale = 0.5 
+        self.rsu_kd_scale = 0.1
+        
+
         super().__init__("init_pose_tuning_node")
 
         self.rate_hz = float(self.declare_parameter("rate_hz", 100.0).value)
@@ -64,7 +72,7 @@ class InitPoseTuningNode(Node):
 
         self.device_path = str(self.declare_parameter("device_path", "").value)
         self.vendor_id = int(self.declare_parameter("vendor_id", 0x046D).value)
-        self.product_id = int(self.declare_parameter("product_id", 0xC219).value)
+        self.product_id = int(self.declare_parameter("product_id", 0xC21F).value)
 
         self.gamepad = Gamepad(
             vendor_id=self.vendor_id,
@@ -162,7 +170,8 @@ class InitPoseTuningNode(Node):
 
         period = 1.0 / max(1.0, self.rate_hz)
         self.timer = self.create_timer(period, self.on_timer)
-
+        self.get_logger().info(f"RSU KP Scale: {self.rsu_kp_scale}, RSU KD Scale: {self.rsu_kd_scale}")
+        self.get_logger().info(f"KP Scale: {self.kp_scale}, KD Scale: {self.kd_scale}")
         self.get_logger().info(
             "Init pose tuning node started. "
             "B: select hip/knee/ankle, Stick Y: tune selected pitch"
@@ -344,8 +353,8 @@ class InitPoseTuningNode(Node):
                     torque=0.0,
                     position=float(pos),
                     velocity=0.0,
-                    kp=float(self.default_rsu_kp if is_rsu else self.kp_map.get(motor_id, 20.0)),
-                    kd=float(self.default_rsu_kd if is_rsu else self.kd_map.get(motor_id, 0.99)),
+                    kp=float(self.default_rsu_kp * self.rsu_kp_scale if is_rsu else self.kp_map.get(motor_id, 20.0)* self.kp_scale),
+                    kd=float(self.default_rsu_kd * self.rsu_kd_scale if is_rsu else self.kd_map.get(motor_id, 0.99)* self.kd_scale),
                 )
             )
 

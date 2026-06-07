@@ -20,7 +20,7 @@ roa_main_controller:
     rsu_frame_id: base_link
 
     topics:
-      walk_policy_cmd: /walk_policy/cmd_vel
+      walk_policy_cmd: /ctrl/policy_cmd
       imu_data: /imu/data
       imu_gravity: /imu/gravity
       rsu_solution: /rsu/solution
@@ -28,6 +28,9 @@ roa_main_controller:
       motor_command: /hardware_interface/command
       motor_state_sub: /hardware_interface/state
       rsu_state_sub: /rsu/state
+    policy_target_lpf:
+      enabled: true
+      cutoff_hz: 1.5
 
 # system_manager_node:
 #   ros__parameters:

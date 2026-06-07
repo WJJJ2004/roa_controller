@@ -130,7 +130,12 @@ class RSUEstimatorFactory:
         self.jac_lambda = 3e-7
         self.jac_h = 1e-4
         self.beta_jac = 0.95
-        self.vel_lpf_tau = 0.0
+
+        # TODO: qdot output LPF cutoff
+        self.vel_lpf_cutoff_hz = 1.5 # 2.0
+        self.vel_lpf_tau = 1.0 / (2.0 * math.pi * self.vel_lpf_cutoff_hz)
+
+        # raw motor_vel은 이미 필터링된 데이터라고 보고 estimator 내부 motor_vel LPF는 끔
         self.motor_vel_lpf_tau = 0.0
 
         node.get_logger().info(
@@ -144,7 +149,7 @@ class RSUEstimatorFactory:
 
     def make(self):
         cfg = RSUStateEstimatorConfig(
-            max_iter=5,
+            max_iter=8, # 5
             lambda_pos=1e-6,
             jac_h=self.jac_h,
             jac_lambda=self.jac_lambda,

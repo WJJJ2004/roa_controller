@@ -4,18 +4,12 @@
 
 /*
 
-ros2 bag record \
-  /hardware_interface/state \
-  /hardware_interface/command \
-  /imu/data \
+ros2 bag record -o rsu_test_001\
   /rsu/state \
   /rsu/solution \
   /rsu/target \
-  /controller/status \
-  /walk_initialized
 
-
-ros2 bag record -o rl_debug_run_01 \
+ros2 bag record  \
   /hardware_interface/state \
   /hardware_interface/command \
   /imu/data \
@@ -35,6 +29,76 @@ using namespace std::chrono_literals;
 
 namespace roa_main_controller
 {
+  
+static std::array<float, roa::policy::iface::Policy12DofV2::kActDim>
+blendVirtualJointTarget(
+  const std::array<float, roa::policy::iface::Policy12DofV2::kActDim>& init,
+  const std::array<float, roa::policy::iface::Policy12DofV2::kActDim>& target,
+  float alpha)
+{
+  std::array<float, roa::policy::iface::Policy12DofV2::kActDim> out{};
+
+  const float beta = 1.0f - alpha;
+
+  for (size_t i = 0; i < out.size(); ++i) {
+    out[i] = beta * init[i] + alpha * target[i];
+  }
+
+  return out;
+}
+
+static float computeBlendAlpha(
+  const rclcpp::Time& now_time,
+  const rclcpp::Time& start_time,
+  double duration_sec)
+{
+  if (duration_sec <= 0.0) {
+    return 1.0f;
+  }
+
+  const double elapsed = (now_time - start_time).seconds();
+  const double s = std::clamp(elapsed / duration_sec, 0.0, 1.0);
+
+  return static_cast<float>(s * s);
+}
+
+static float computeFirstOrderLpfAlpha(
+  double cutoff_hz,
+  double dt_sec)
+{
+  if (cutoff_hz <= 0.0 || dt_sec <= 0.0) {
+    return 1.0f;
+  }
+
+  const double tau = 1.0 / (2.0 * M_PI * cutoff_hz);
+  const double alpha = dt_sec / (tau + dt_sec);
+
+  return static_cast<float>(std::clamp(alpha, 0.0, 1.0));
+}
+
+static std::array<float, roa::policy::iface::Policy12DofV2::kActDim>
+applyFirstOrderLpf12Dof(
+  const std::array<float, roa::policy::iface::Policy12DofV2::kActDim>& input,
+  std::array<float, roa::policy::iface::Policy12DofV2::kActDim>& state,
+  bool& initialized,
+  double cutoff_hz,
+  double dt_sec)
+{
+  if (!initialized) {
+    state = input;
+    initialized = true;
+    return state;
+  }
+
+  const float alpha = computeFirstOrderLpfAlpha(cutoff_hz, dt_sec);
+
+  for (size_t i = 0; i < state.size(); ++i) {
+    state[i] = state[i] + alpha * (input[i] - state[i]);
+  }
+
+  return state;
+}
+
 RoaControllerNode::RoaControllerNode(const rclcpp::NodeOptions& options)
 : rclcpp_lifecycle::LifecycleNode("roa_main_controller", options)
 {
@@ -132,7 +196,10 @@ RoaControllerNode::on_activate(const rclcpp_lifecycle::State &)
   }
 
   walk_blend_start_time_ = now();
-  
+  q_target_lpf_state_.fill(0.0f);
+  q_target_lpf_initialized_ = false;
+  last_lpf_update_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
+
   if (rsu_target_pub_) {
     rsu_target_pub_->on_activate();
   }
@@ -149,7 +216,6 @@ RoaControllerNode::on_activate(const rclcpp_lifecycle::State &)
   if (status_timer_) {
     status_timer_->reset();
   }
-
   RCLCPP_INFO(get_logger(), "Controller activated");
   return CallbackReturn::SUCCESS;
 }
@@ -300,6 +366,13 @@ void RoaControllerNode::declareAndLoadParams()
   if (!this->has_parameter("topics.rsu_state_sub")) {
     this->declare_parameter<std::string>("topics.rsu_state_sub", topic_rsu_status_);
   }
+  // policy target LPF
+  if (!this->has_parameter("policy_target_lpf.enabled")) {
+    this->declare_parameter<bool>("policy_target_lpf.enabled", policy_target_lpf_enabled_);
+  }
+  if (!this->has_parameter("policy_target_lpf.cutoff_hz")) {
+    this->declare_parameter<double>("policy_target_lpf.cutoff_hz", policy_target_lpf_cutoff_hz_);
+  }
 
   is_realtime_control_mode_ = this->get_parameter("REALTIME_CONTROL_MODE").as_bool();
   if (is_realtime_control_mode_) {
@@ -346,6 +419,19 @@ void RoaControllerNode::declareAndLoadParams()
   gravity_timeout_ = rclcpp::Duration::from_seconds(gravity_timeout_ms_ / 1000.0);
   motor_state_timeout_ = rclcpp::Duration::from_seconds(motor_state_timeout_ms_ / 1000.0);
   policy_cmd_timeout_ = rclcpp::Duration::from_seconds(policy_cmd_timeout_ms_ / 1000.0);
+
+  policy_target_lpf_enabled_ =
+    this->get_parameter("policy_target_lpf.enabled").as_bool();
+
+  policy_target_lpf_cutoff_hz_ =
+    this->get_parameter("policy_target_lpf.cutoff_hz").as_double();
+
+  if (policy_target_lpf_cutoff_hz_ < 0.0) {
+    RCLCPP_WARN(
+      get_logger(),
+      "policy_target_lpf.cutoff_hz is negative. Clamping to 0.0 Hz");
+    policy_target_lpf_cutoff_hz_ = 0.0;
+  }
 }
 
 bool RoaControllerNode::init_policy()
@@ -734,35 +820,75 @@ void RoaControllerNode::InferenceLoop()
   }
 
   using P = roa::policy::iface::Policy12DofV2;
-  auto q_target = P::action_to_q_target(
+
+  // auto q_target = P::action_to_q_target(
+  //   act_buffer_, default_angles_, action_scale_);
+
+  // const float alpha = walk_blend_enabled_
+  //   ? computeBlendAlpha(tnow, walk_blend_start_time_, walk_blend_duration_sec_)
+  //   : 1.0f;
+
+  // auto q_blended = blendVirtualJointTarget(
+  //   virtual_init_pos_,
+  //   q_target,
+  //   alpha);
+
+  auto q_target_raw = P::action_to_q_target(
     act_buffer_, default_angles_, action_scale_);
 
+  double lpf_dt_sec = 1.0 / std::max(1.0, policy_rate_hz_);
 
-  printInferenceDebug(q_target);
+  if (last_lpf_update_time_.nanoseconds() > 0) {
+    const double measured_dt = (tnow - last_lpf_update_time_).seconds();
 
-  // if (control_mode_ == CONTROL_MODE::DEBUG) {
-  //   printInferenceDebug(q_target);
-  // }
+    if (measured_dt > 0.0 && measured_dt < 1.0) {
+      lpf_dt_sec = measured_dt;
+    }
+  }
+
+  last_lpf_update_time_ = tnow;
+
+  auto q_target = q_target_raw;
+
+  if (policy_target_lpf_enabled_) {
+    q_target = applyFirstOrderLpf12Dof(
+      q_target_raw,
+      q_target_lpf_state_,
+      q_target_lpf_initialized_,
+      policy_target_lpf_cutoff_hz_,
+      lpf_dt_sec);
+  }
+
+  const float alpha = walk_blend_enabled_
+    ? computeBlendAlpha(tnow, walk_blend_start_time_, walk_blend_duration_sec_)
+    : 1.0f;
+
+  auto q_blended = blendVirtualJointTarget(
+    virtual_init_pos_,
+    q_target,
+    alpha);
+
+  printInferenceDebug(q_blended);
 
   {
     std::lock_guard<std::mutex> lk(cmd_m_);
 
-    motor_cmd.left_hip_pitch   = q_target[P::L_HIP_PITCH];
-    motor_cmd.right_hip_pitch  = q_target[P::R_HIP_PITCH];
-    motor_cmd.left_hip_roll    = q_target[P::L_HIP_ROLL];
-    motor_cmd.right_hip_roll   = q_target[P::R_HIP_ROLL];
-    motor_cmd.left_hip_yaw     = q_target[P::L_HIP_YAW];
-    motor_cmd.right_hip_yaw    = q_target[P::R_HIP_YAW];
-    motor_cmd.left_knee_pitch  = q_target[P::L_KNEE_PITCH];
-    motor_cmd.right_knee_pitch = q_target[P::R_KNEE_PITCH];
+    motor_cmd.left_hip_pitch   = q_blended[P::L_HIP_PITCH];
+    motor_cmd.right_hip_pitch  = q_blended[P::R_HIP_PITCH];
+    motor_cmd.left_hip_roll    = q_blended[P::L_HIP_ROLL];
+    motor_cmd.right_hip_roll   = q_blended[P::R_HIP_ROLL];
+    motor_cmd.left_hip_yaw     = q_blended[P::L_HIP_YAW];
+    motor_cmd.right_hip_yaw    = q_blended[P::R_HIP_YAW];
+    motor_cmd.left_knee_pitch  = q_blended[P::L_KNEE_PITCH];
+    motor_cmd.right_knee_pitch = q_blended[P::R_KNEE_PITCH];
 
   }
 
   publish_rsu_target(
-    q_target[P::L_ANKLE_ROLL],
-    q_target[P::L_ANKLE_PITCH],
-    q_target[P::R_ANKLE_ROLL],
-    q_target[P::R_ANKLE_PITCH]
+    q_blended[P::L_ANKLE_ROLL],
+    q_blended[P::L_ANKLE_PITCH],
+    q_blended[P::R_ANKLE_ROLL],
+    q_blended[P::R_ANKLE_PITCH]
   );
 
   if (is_infer_first_run_done == false)
@@ -770,47 +896,6 @@ void RoaControllerNode::InferenceLoop()
     is_infer_first_run_done = true;
     RCLCPP_INFO(get_logger(), "[InferenceLoop] First run complete - policy outputs may now be used in control loop");
   }
-}
-
-static roa_packet_manager::PacketManager::Command12Dof blendCommand(
-  const roa_packet_manager::PacketManager::Command12Dof& init,
-  const roa_packet_manager::PacketManager::Command12Dof& target,
-  float alpha)
-{
-  roa_packet_manager::PacketManager::Command12Dof out = init;
-
-  const float beta = 1.0f - alpha;
-
-  out.left_hip_pitch   = beta * init.left_hip_pitch   + alpha * target.left_hip_pitch;
-  out.right_hip_pitch  = beta * init.right_hip_pitch  + alpha * target.right_hip_pitch;
-  out.left_hip_roll    = beta * init.left_hip_roll    + alpha * target.left_hip_roll;
-  out.right_hip_roll   = beta * init.right_hip_roll   + alpha * target.right_hip_roll;
-  out.left_hip_yaw     = beta * init.left_hip_yaw     + alpha * target.left_hip_yaw;
-  out.right_hip_yaw    = beta * init.right_hip_yaw    + alpha * target.right_hip_yaw;
-  out.left_knee_pitch  = beta * init.left_knee_pitch  + alpha * target.left_knee_pitch;
-  out.right_knee_pitch = beta * init.right_knee_pitch + alpha * target.right_knee_pitch;
-
-  out.left_rsu_upper   = beta * init.left_rsu_upper   + alpha * target.left_rsu_upper;
-  out.left_rsu_lower   = beta * init.left_rsu_lower   + alpha * target.left_rsu_lower;
-  out.right_rsu_upper  = beta * init.right_rsu_upper  + alpha * target.right_rsu_upper;
-  out.right_rsu_lower  = beta * init.right_rsu_lower  + alpha * target.right_rsu_lower;
-
-  return out;
-}
-
-static float computeBlendAlpha(
-  const rclcpp::Time& now_time,
-  const rclcpp::Time& start_time,
-  double duration_sec)
-{
-  if (duration_sec <= 0.0) {
-    return 1.0f;
-  }
-
-  const double elapsed = (now_time - start_time).seconds();
-  const double s = std::clamp(elapsed / duration_sec, 0.0, 1.0);
-
-  return static_cast<float>(s * s);
 }
 
 
@@ -883,22 +968,22 @@ void RoaControllerNode::ControlLoop()
 
 
   if (control_mode_ == CONTROL_MODE::RT_CONTROL) {
-    const auto init_cmd = roa::common::make_init_pose();
+    // const auto init_cmd = roa::common::make_init_pose();
 
-    const float alpha = walk_blend_enabled_
-      ? computeBlendAlpha(tnow, walk_blend_start_time_, walk_blend_duration_sec_)
-      : 1.0f;
+    // const float alpha = walk_blend_enabled_
+    //   ? computeBlendAlpha(tnow, walk_blend_start_time_, walk_blend_duration_sec_)
+    //   : 1.0f;
 
-    const auto blended_cmd = blendCommand(init_cmd, cmd, alpha);
+    // const auto blended_cmd = blendCommand(init_cmd, cmd, alpha);
 
-    RCLCPP_INFO_THROTTLE(
-      get_logger(), *get_clock(), 500,
-      "[WalkBlend] actuator-space alpha=%.3f", alpha);
+    // RCLCPP_INFO_THROTTLE(
+    //   get_logger(), *get_clock(), 500,
+    //   "[WalkBlend] actuator-space alpha=%.3f", alpha);
 
     auto msg = roa_packet_manager::PacketManager::build(
-      blended_cmd,
+      cmd,
       this->now(),
-      "/CTRL/INFERENCE_CONTROL_BLEND");
+      "/CTRL/RT_CONTROL");
 
     motor_packit_pub_->publish(msg);
   }
