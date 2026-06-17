@@ -24,7 +24,7 @@
 #include "roa_packet_manager/packet_manager.hpp"
 
 #include <roa_policy_driver/policy_driver.hpp>
-#include <roa_policy_driver/interfaces/policy_12dof_v1.hpp>
+#include <roa_policy_driver/interfaces/policy_12dof_v2.hpp>
 
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <rclcpp_lifecycle/lifecycle_publisher.hpp>
@@ -61,9 +61,9 @@ public:
 
 private:
   // fixed dimensions
-  static constexpr int kObsDim = roa::policy::iface::Policy12DofV1::kObsDim;
-  static constexpr int kActDim = roa::policy::iface::Policy12DofV1::kActDim;
-  static constexpr int kDof    = roa::policy::iface::Policy12DofV1::kDof;
+  static constexpr int kObsDim = roa::policy::iface::Policy12DofV2::kObsDim;
+  static constexpr int kActDim = roa::policy::iface::Policy12DofV2::kActDim;
+  static constexpr int kDof    = roa::policy::iface::Policy12DofV2::kDof;
 
   // Inference buffers
   std::array<float, kDof> q_cur{};
@@ -102,6 +102,16 @@ private:
   bool compute_rt_ok(const rclcpp::Time& tnow) const;
 
 private:
+
+// Policy q_target LPF
+bool policy_target_lpf_enabled_ = true;
+double policy_target_lpf_cutoff_hz_ = 1.5;
+
+std::array<float, kActDim> q_target_lpf_state_{};
+bool q_target_lpf_initialized_ = false;
+
+rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
+
   // roa_packet_manager::PacketManager::Command12Dof
   // setInitPose() 
   // {  
@@ -132,7 +142,7 @@ private:
   static std::array<float, kActDim>
   make_default_angles()
   {
-    using P = roa::policy::iface::Policy12DofV1;
+    using P = roa::policy::iface::Policy12DofV2;
     std::array<float, P::kActDim> q{};
 
     q[P::L_HIP_PITCH]    = -roa::constants::HIP_PITCH_DEF;
@@ -154,7 +164,7 @@ private:
   static std::array<float, kActDim>
   initLastAction()
   {
-    using P = roa::policy::iface::Policy12DofV1;
+    using P = roa::policy::iface::Policy12DofV2;
     std::array<float, P::kActDim> q{};
 
     // TODO 추론 테스트
@@ -177,9 +187,33 @@ private:
     return q;
   }
 
+  static std::array<float, kActDim>
+  makeVirtualInitPos()
+  {
+    using P = roa::policy::iface::Policy12DofV2;
+    std::array<float, P::kActDim> q{};
+    
+    q[P::L_HIP_PITCH]    = -roa::constants::HIP_INIT_INF;
+    q[P::R_HIP_PITCH]    =  roa::constants::HIP_INIT_INF;
+    q[P::L_HIP_ROLL]     =  0.00f;
+    q[P::R_HIP_ROLL]     =  0.00f;
+    q[P::L_HIP_YAW]      =  0.00f;
+    q[P::R_HIP_YAW]      =  0.00f;
+    q[P::L_KNEE_PITCH]   =  roa::constants::KNEE_INIT_INF;
+    q[P::R_KNEE_PITCH]   = -roa::constants::KNEE_INIT_INF;
+    q[P::L_ANKLE_PITCH]  = -roa::constants::ANKLE_INIT_INF;
+    q[P::R_ANKLE_PITCH]  =  roa::constants::ANKLE_INIT_INF;
+    q[P::L_ANKLE_ROLL]   =  0.00f;
+    q[P::R_ANKLE_ROLL]   =  0.00f;
+
+    return q;
+  }
+
+  // NOTE: default angle은 상대각도(obs.q_rel)의 기준점이자, policy의 출력(act)이 매핑되는 절대각도 기준점임.
   const std::array<float, kActDim> default_angles_ = make_default_angles();
   const float action_scale_ = 0.5;
-  
+  const std::array<float, kActDim> virtual_init_pos_ = makeVirtualInitPos();
+
   bool is_activate{false};
   bool is_realtime_control_mode_ = false;
   CONTROL_MODE control_mode_;
@@ -242,8 +276,8 @@ private:
   std::array<float, kDof> last_action_{};
 
   // // structured obs/act
-  roa::policy::iface::Policy12DofV1::Obs obs_{};
-  // roa::policy::iface::Policy12DofV1::Act act_{};
+  roa::policy::iface::Policy12DofV2::Obs obs_{};
+  // roa::policy::iface::Policy12DofV2::Act act_{};
 
 
   bool init_policy();

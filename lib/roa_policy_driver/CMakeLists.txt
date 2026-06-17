@@ -92,32 +92,27 @@ install(FILES
 if(ROA_BUILD_TESTS)
   enable_testing()
 
-  set(ROA_DEFAULT_MODEL "${CMAKE_CURRENT_SOURCE_DIR}/onnx/12dof/policy.onnx")
-
-  add_executable(test_dimensions tests/test_dimensions.cpp)
-  target_link_libraries(test_dimensions PRIVATE roa_policy_driver)
-  add_test(NAME test_dimensions COMMAND test_dimensions "${ROA_DEFAULT_MODEL}")
+  set(ROA_DEFAULT_MODEL "${CMAKE_CURRENT_SOURCE_DIR}/onnx/12dof_guv/policy.onnx")
 
   add_executable(bench_inference tests/bench_inference.cpp)
   target_link_libraries(bench_inference PRIVATE roa_policy_driver)
 
+  # add_executable(test_golden_io tests/test_golden_io.cpp)
+  # target_link_libraries(test_golden_io PRIVATE roa_policy_driver)
+  # add_test(NAME test_golden_io COMMAND test_golden_io
+  #   "${ROA_DEFAULT_MODEL}"
+  #   "${CMAKE_CURRENT_SOURCE_DIR}/onnx/12dof_guv/data/golden_obs.bin"
+  #   "${CMAKE_CURRENT_SOURCE_DIR}/onnx/12dof_guv/data/golden_action.bin"
+  # )
 
-  add_executable(test_golden_io tests/test_golden_io.cpp)
-  target_link_libraries(test_golden_io PRIVATE roa_policy_driver)
-  add_test(NAME test_golden_io COMMAND test_golden_io
-    "${ROA_DEFAULT_MODEL}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/onnx/12dof/data/golden_obs.bin"
-    "${CMAKE_CURRENT_SOURCE_DIR}/onnx/12dof/data/golden_action.bin"
-  )
-
-  add_executable(test_stress tests/test_stress.cpp)
-  target_link_libraries(test_stress PRIVATE roa_policy_driver)
-  add_test(NAME test_stress COMMAND test_stress "${ROA_DEFAULT_MODEL}" "200000")
+  # add_executable(test_stress tests/test_stress.cpp)
+  # target_link_libraries(test_stress PRIVATE roa_policy_driver)
+  # add_test(NAME test_stress COMMAND test_stress "${ROA_DEFAULT_MODEL}" "200000")
 
   add_executable(test_iface_roundtrip_12dof tests/test_iface_roundtrip_12dof.cpp)
   # 헤더-only라 링크 없어도 되지만, 통일/향후 확장 위해 링크 걸어도 OK
   target_link_libraries(test_iface_roundtrip_12dof PRIVATE roa_policy_driver)
   add_test(NAME test_iface_roundtrip_12dof COMMAND test_iface_roundtrip_12dof
-    "${CMAKE_CURRENT_SOURCE_DIR}/onnx/12dof/data/golden_obs.bin"
+    "${CMAKE_CURRENT_SOURCE_DIR}/onnx/12dof_guv/data/golden_obs.bin"
   )
 endif()

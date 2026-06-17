@@ -52,7 +52,12 @@ state_qos = QoSProfile(
 class RsuHwGamepadTestNode(Node):
     def __init__(self):
         super().__init__("hw_controll_test_node")
-
+        self.kp_scale = 0.25 * 0.5
+        self.kd_scale = 0.1 * 0.5
+        # self.rsu_kp_scale = 0.25 * 0.5
+        # self.rsu_kd_scale = 0.1 * 0.5
+        # self.rsu_kp_scale = 0.5
+        # self.rsu_kd_scale = 0.5
         # ===== Parameters =====
         self.rate_hz = float(self.declare_parameter("rate_hz", 100.0).value)
         self.input_deadzone = float(self.declare_parameter("input_deadzone", 0.05).value)
@@ -67,9 +72,9 @@ class RsuHwGamepadTestNode(Node):
         self.pitch_max = float(self.declare_parameter("pitch_max_limit_rad", rad(30.0)).value)
 
         self.device_path = str(self.declare_parameter("device_path", "").value)
+
         self.vendor_id = int(self.declare_parameter("vendor_id", 0x046D).value)
         self.product_id = int(self.declare_parameter("product_id", 0xC219).value)
-
         # ===== Gamepad =====
         self.gamepad = Gamepad(
             vendor_id=self.vendor_id,
@@ -397,8 +402,8 @@ class RsuHwGamepadTestNode(Node):
                     torque=0.0,
                     position=float(pos),
                     velocity=0.0,
-                    kp=float(self.default_rsu_kp if is_rsu else self.kp_map.get(int(motor_id), 20.0)),
-                    kd=float(self.default_rsu_kd if is_rsu else self.kd_map.get(int(motor_id), 0.99)),
+                    kp=float(self.default_rsu_kp if is_rsu else self.kp_map.get(int(motor_id), 20.0)) * self.kp_scale,
+                    kd=float(self.default_rsu_kd if is_rsu else self.kd_map.get(int(motor_id), 0.99)) * self.kd_scale,
                 )
             )
 

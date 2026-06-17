@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "roa_policy_driver/interfaces/policy_12dof_v1.hpp"
+#include "roa_policy_driver/interfaces/policy_12dof_v2.hpp"
 
 static bool read_f32_bin(const std::string& path, std::vector<float>& out) {
   std::ifstream ifs(path, std::ios::binary);
@@ -26,9 +26,9 @@ static bool read_f32_bin(const std::string& path, std::vector<float>& out) {
 }
 
 int main(int argc, char** argv) {
-  using Spec = roa::policy::iface::Policy12DofV1;
+  using Spec = roa::policy::iface::Policy12DofV2;
 
-  std::string obs_path = "onnx/12dof/data/golden_obs.bin";
+  std::string obs_path = "onnx/12dof_guv/data/golden_obs.bin";
   if (argc >= 2) obs_path = argv[1];
 
   std::vector<float> obs_packed;

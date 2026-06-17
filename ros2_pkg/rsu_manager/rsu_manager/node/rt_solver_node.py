@@ -137,6 +137,9 @@ class RSURtSolverNode(Node):
 
         self.declare_parameter("rsu_state_frame_id", "base_link")
 
+        self.declare_parameter("target_lpf_enable", True)
+        self.declare_parameter("target_lpf_cutoff_hz", 2.0)
+
         # =========================
         # Get Parameters
         # =========================
@@ -182,6 +185,13 @@ class RSURtSolverNode(Node):
             self.get_parameter("rsu_state_frame_id").value
         )
 
+        self.target_lpf_enable = bool(
+            self.get_parameter("target_lpf_enable").value
+        )
+
+        self.target_lpf_cutoff_hz = float(
+            self.get_parameter("target_lpf_cutoff_hz").value
+        )
         # =========================
         # Print Parameters
         # =========================
@@ -197,6 +207,8 @@ class RSURtSolverNode(Node):
             f"  left_alpha_seed: {self.left_alpha_seed.tolist()}\n"
             f"  right_alpha_seed: {self.right_alpha_seed.tolist()}\n"
             f"  rsu_state_frame_id: {self.rsu_state_frame_id}"
+            f"  target_lpf_enable: {self.target_lpf_enable}\n"
+            f"  target_lpf_cutoff_hz: {self.target_lpf_cutoff_hz}\n"
         )
     
     def _accept_target_order(self, seq: int, stamp) -> bool:
@@ -220,13 +232,81 @@ class RSURtSolverNode(Node):
 
         self._last_stamp = stamp
         return True
+    def _filter_rsu_target(self, target_2d: np.ndarray, stamp) -> np.ndarray:
+        target_2d = np.array(target_2d, dtype=np.float64).reshape(2, 2)
 
+        if not self.target_lpf_enable:
+            self.target_lpf_2d = target_2d.copy()
+            self.target_lpf_initialized = True
+            self._last_target_lpf_stamp_ns = stamp_to_ns(stamp)
+            return target_2d
+
+        cutoff_hz = float(self.target_lpf_cutoff_hz)
+
+        if not np.isfinite(cutoff_hz) or cutoff_hz <= 0.0:
+            self.get_logger().warn(
+                f"Invalid target_lpf_cutoff_hz={cutoff_hz}. Bypassing LPF.",
+                throttle_duration_sec=1.0,
+            )
+            self.target_lpf_2d = target_2d.copy()
+            self.target_lpf_initialized = True
+            self._last_target_lpf_stamp_ns = stamp_to_ns(stamp)
+            return target_2d
+
+        stamp_ns = stamp_to_ns(stamp)
+
+        if (not self.target_lpf_initialized) or (self._last_target_lpf_stamp_ns is None):
+            self.target_lpf_2d = target_2d.copy()
+            self.target_lpf_initialized = True
+            self._last_target_lpf_stamp_ns = stamp_ns
+            return self.target_lpf_2d.copy()
+
+        dt = (stamp_ns - self._last_target_lpf_stamp_ns) * 1e-9
+        self._last_target_lpf_stamp_ns = stamp_ns
+
+        if not np.isfinite(dt) or dt <= 0.0:
+            self.get_logger().warn(
+                f"Invalid target LPF dt={dt}. Holding previous filtered target.",
+                throttle_duration_sec=1.0,
+            )
+            return self.target_lpf_2d.copy()
+
+        tau = 1.0 / (2.0 * np.pi * cutoff_hz)
+        alpha = dt / (tau + dt)
+
+        self.target_lpf_2d = self.target_lpf_2d + alpha * (target_2d - self.target_lpf_2d)
+
+        return self.target_lpf_2d.copy()
     def _on_both_foot_request(self, msg: RsuTarget):
         if not self._accept_target_order(msg.seq, msg.header.stamp):
             self.get_logger().warn(
                 "Received /rsu/target with non-increasing seq/stamp. Ignoring."
             )
             return
+
+        # # Raw target from /rsu/target
+        # l_roll_raw = float(msg.left_roll)
+        # l_pitch_raw = float(msg.left_pitch)
+
+        # # 오른발은 내부 solver convention에 맞추기 위해 부호 반전
+        # r_roll_raw = float(msg.right_roll) * -1.0
+        # r_pitch_raw = float(msg.right_pitch) * -1.0
+
+        # target_raw_2d = np.array([
+        #     [l_roll_raw, l_pitch_raw],
+        #     [r_roll_raw, r_pitch_raw],
+        # ], dtype=np.float64)
+
+        # # 1st-order LPF before RSU IK solve
+        # target_filt_2d = self._filter_rsu_target(
+        #     target_2d=target_raw_2d,
+        #     stamp=msg.header.stamp,
+        # )
+
+        # l_roll = float(target_filt_2d[0, 0])
+        # l_pitch = float(target_filt_2d[0, 1])
+        # r_roll = float(target_filt_2d[1, 0])
+        # r_pitch = float(target_filt_2d[1, 1])
 
         l_roll = float(msg.left_roll)
         l_pitch = float(msg.left_pitch)
@@ -264,6 +344,14 @@ class RSURtSolverNode(Node):
         # 외부 HW convention으로 되돌리기 위해 오른발 actuator 부호 반전
         out.right_actuator_1 = float(self.prev_alpha_2d[1, 0]) * -1.0
         out.right_actuator_2 = float(self.prev_alpha_2d[1, 1]) * -1.0
+        
+        self.prev_alpha_2d = np.zeros((2, 2), dtype=np.float64)
+
+        # RSU target LPF state
+        # shape: [foot, axis] = [[left_roll, left_pitch], [right_roll_internal, right_pitch_internal]]
+        self.target_lpf_2d = np.zeros((2, 2), dtype=np.float64)
+        self.target_lpf_initialized = False
+        self._last_target_lpf_stamp_ns = None
 
         out.feasible = bool(left_ok and right_ok)
 
