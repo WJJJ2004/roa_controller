@@ -648,10 +648,10 @@ class RSURtImpedanceSolverNode(Node):
         out.feasible = bool(
             left_ik_ok
             and right_ik_ok
-            and left_imp_ok
-            and right_imp_ok
-            and self.left_state_ready
-            and self.right_state_ready
+            # and left_imp_ok
+            # and right_imp_ok
+            # and self.left_state_ready
+            # and self.right_state_ready
         )
 
         self.pub_imp_solution.publish(out)

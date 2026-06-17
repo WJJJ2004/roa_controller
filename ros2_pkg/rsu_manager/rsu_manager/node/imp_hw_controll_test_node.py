@@ -138,13 +138,29 @@ class RsuHwGamepadTestNode(Node):
 
         # ===== RSU actuator command state =====
         self.rsu_solution_ready = False
+
+        self.default_rsu_kp = 18.0
+        self.default_rsu_kd = 4.5
+        
         self.actuator_cmd = {
             18: None,  # left actuator 1
             20: None,  # left actuator 2
             19: None,  # right actuator 1
             21: None,  # right actuator 2
         }
+        self.rsu_kp_cmd = {
+            18: self.default_rsu_kp,
+            20: self.default_rsu_kp,
+            19: self.default_rsu_kp,
+            21: self.default_rsu_kp,
+        }
 
+        self.rsu_kd_cmd = {
+            18: self.default_rsu_kd,
+            20: self.default_rsu_kd,
+            19: self.default_rsu_kd,
+            21: self.default_rsu_kd,
+        }
         # 현재 encoder 기반 hold용
         self.latest_motor_pos = {}
 
@@ -186,9 +202,6 @@ class RsuHwGamepadTestNode(Node):
             15: 3.419,
             17: 8.654,
         }
-
-        self.default_rsu_kp = 40.0
-        self.default_rsu_kd = 0.99
 
         period = 1.0 / max(1.0, self.rate_hz)
         self.timer = self.create_timer(period, self.on_timer)
@@ -281,6 +294,19 @@ class RsuHwGamepadTestNode(Node):
         self.actuator_cmd[20] = float(msg.left_actuator_2.q_target)
         self.actuator_cmd[19] = float(msg.right_actuator_1.q_target)
         self.actuator_cmd[21] = float(msg.right_actuator_2.q_target)
+
+        # Equivalent actuator Kp
+        self.rsu_kp_cmd[18] = float(msg.left_actuator_1.kp_eqv)
+        self.rsu_kp_cmd[20] = float(msg.left_actuator_2.kp_eqv)
+        self.rsu_kp_cmd[19] = float(msg.right_actuator_1.kp_eqv)
+        self.rsu_kp_cmd[21] = float(msg.right_actuator_2.kp_eqv)
+
+        # Equivalent actuator Kd
+        self.rsu_kd_cmd[18] = float(msg.left_actuator_1.kd_eqv)
+        self.rsu_kd_cmd[20] = float(msg.left_actuator_2.kd_eqv)
+        self.rsu_kd_cmd[19] = float(msg.right_actuator_1.kd_eqv)
+        self.rsu_kd_cmd[21] = float(msg.right_actuator_2.kd_eqv)
+
         self.rsu_solution_ready = True
 
     def handle_gamepad_toggle(self, button_state: bool):
@@ -396,6 +422,19 @@ class RsuHwGamepadTestNode(Node):
                 return
 
             is_rsu = motor_id in [18, 20, 19, 21]
+            
+            if is_rsu:
+                kp_cmd = self.rsu_kp_cmd[int(motor_id)]
+                kd_cmd = self.rsu_kd_cmd[int(motor_id)]
+            else:
+                kp_cmd = (
+                    self.kp_map.get(int(motor_id), 20.0)
+                    * self.kp_scale
+                )
+                kd_cmd = (
+                    self.kd_map.get(int(motor_id), 0.99)
+                    * self.kd_scale
+                )
 
             msg.commands.append(
                 MotorCommand(
@@ -403,8 +442,11 @@ class RsuHwGamepadTestNode(Node):
                     torque=0.0,
                     position=float(pos),
                     velocity=0.0,
-                    kp=float(self.default_rsu_kp if is_rsu else self.kp_map.get(int(motor_id), 20.0)) * self.kp_scale,
-                    kd=float(self.default_rsu_kd if is_rsu else self.kd_map.get(int(motor_id), 0.99)) * self.kd_scale,
+                    kp=float(kp_cmd),
+                    kd=float(kd_cmd),                    
+                    
+                    # kp=float(self.default_rsu_kp if is_rsu else self.kp_map.get(int(motor_id), 20.0)) * self.kp_scale,
+                    # kd=float(self.default_rsu_kd if is_rsu else self.kd_map.get(int(motor_id), 0.99)) * self.kd_scale,
                 )
             )
 
