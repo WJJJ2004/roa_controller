@@ -21,8 +21,8 @@ def generate_launch_description():
         ),
         Node(
                 package="rsu_manager",
-                executable="hw_controll_test_node",
-                name="hw_controll_test_node",
+                executable="imp_hw_controll_test_node",
+                name="imp_hw_controll_test_node",
                 output="screen",
                 arguments=["--ros-args", "--log-level", "info"],
         ),
