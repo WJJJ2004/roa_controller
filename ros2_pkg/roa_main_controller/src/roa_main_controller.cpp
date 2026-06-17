@@ -122,7 +122,7 @@ RoaControllerNode::on_configure(const rclcpp_lifecycle::State &)
   // last_hw_cmd_.data.resize(static_cast<size_t>(std::max(0, walk_len_)), 0.0f);
 
   // 내부 상태 초기화
-  last_safe_rsu_ = initLastSafeRsu();
+  last_safe_rsu_q_ = initLastSafeRsu();
   rsu_seq_ = 0;
   policy_loaded_ = false;
   last_policy_update_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
@@ -278,7 +278,7 @@ RoaControllerNode::on_cleanup(const rclcpp_lifecycle::State &)
 
   policy_loaded_ = false;
 
-  last_safe_rsu_ = initLastSafeRsu();
+  last_safe_rsu_q_ = initLastSafeRsu();
   rsu_seq_ = 0;
 
   return CallbackReturn::SUCCESS;
@@ -696,7 +696,7 @@ void RoaControllerNode::setupRosInterfaces()
   gravity_sub_ = create_subscription<geometry_msgs::msg::Vector3Stamped>(
     topic_imu_gravity_, imu_qos, std::bind(&RoaControllerNode::onGravity, this, std::placeholders::_1));
 
-  rsu_solution_sub_ = create_subscription<roa_interfaces::msg::RsuSolution>(
+  rsu_solution_sub_ = create_subscription<roa_interfaces::msg::RsuImpSol>(
     topic_rsu_solution_, rsu_qos, std::bind(&RoaControllerNode::onRsuSolution, this, std::placeholders::_1));
   motor_state_sub_  = create_subscription<roa_interfaces::msg::MotorStateArray>(
     topic_motor_state_, motor_status_qos, std::bind(&RoaControllerNode::onMotorStatus, this, std::placeholders::_1));
@@ -737,7 +737,7 @@ void RoaControllerNode::onGravity(geometry_msgs::msg::Vector3Stamped::SharedPtr 
   gravity_latch_.set(std::move(msg), now());
 }
 
-void RoaControllerNode::onRsuSolution(roa_interfaces::msg::RsuSolution::SharedPtr msg)
+void RoaControllerNode::onRsuSolution(roa_interfaces::msg::RsuImpSol::SharedPtr msg)
 {
   rsu_latch_.set(std::move(msg), now());
 }
@@ -937,16 +937,26 @@ void RoaControllerNode::ControlLoop()
 
   if (rsu_ok) {
     const bool finite =
-      std::isfinite(rsu_msg->left_actuator_1)  &&
-      std::isfinite(rsu_msg->left_actuator_2)  &&
-      std::isfinite(rsu_msg->right_actuator_1) &&
-      std::isfinite(rsu_msg->right_actuator_2);
+      std::isfinite(rsu_msg->left_actuator_1.q_target)  &&
+      std::isfinite(rsu_msg->left_actuator_2.q_target)  &&
+      std::isfinite(rsu_msg->right_actuator_1.q_target) &&
+      std::isfinite(rsu_msg->right_actuator_2.q_target);
 
     if (finite) {
-      last_safe_rsu_[0] = rsu_msg->left_actuator_1;
-      last_safe_rsu_[1] = rsu_msg->left_actuator_2;
-      last_safe_rsu_[2] = rsu_msg->right_actuator_1;
-      last_safe_rsu_[3] = rsu_msg->right_actuator_2;
+      last_safe_rsu_q_[0] = rsu_msg->left_actuator_1.q_target;
+      last_safe_rsu_q_[1] = rsu_msg->left_actuator_2.q_target;
+      last_safe_rsu_q_[2] = rsu_msg->right_actuator_1.q_target;
+      last_safe_rsu_q_[3] = rsu_msg->right_actuator_2.q_target;
+
+      last_safe_rsu_kp_[0] = rsu_msg->left_actuator_1.kp_eqv;
+      last_safe_rsu_kp_[1] = rsu_msg->left_actuator_2.kp_eqv;
+      last_safe_rsu_kp_[2] = rsu_msg->right_actuator_1.kp_eqv;
+      last_safe_rsu_kp_[3] = rsu_msg->right_actuator_2.kp_eqv;
+
+      last_safe_rsu_kd_[0] = rsu_msg->left_actuator_1.kd_eqv;
+      last_safe_rsu_kd_[1] = rsu_msg->left_actuator_2.kd_eqv;
+      last_safe_rsu_kd_[2] = rsu_msg->right_actuator_1.kd_eqv;
+      last_safe_rsu_kd_[3] = rsu_msg->right_actuator_2.kd_eqv;
     } else {
       RCLCPP_WARN_THROTTLE(
         get_logger(), *get_clock(), 2000,
@@ -959,10 +969,20 @@ void RoaControllerNode::ControlLoop()
   }
 
   // stale / infeasible이면 hold
-  cmd.left_rsu_upper  = last_safe_rsu_[0];
-  cmd.left_rsu_lower  = last_safe_rsu_[1];
-  cmd.right_rsu_upper = last_safe_rsu_[2];
-  cmd.right_rsu_lower = last_safe_rsu_[3];
+  cmd.left_rsu_upper  = last_safe_rsu_q_[0];
+  cmd.left_rsu_lower  = last_safe_rsu_q_[1];
+  cmd.right_rsu_upper = last_safe_rsu_q_[2];
+  cmd.right_rsu_lower = last_safe_rsu_q_[3];
+
+  cmd.left_rsu_upper_kp  = last_safe_rsu_kp_[0];
+  cmd.left_rsu_lower_kp  = last_safe_rsu_kp_[1];
+  cmd.right_rsu_upper_kp = last_safe_rsu_kp_[2];
+  cmd.right_rsu_lower_kp = last_safe_rsu_kp_[3];
+
+  cmd.left_rsu_upper_kd  = last_safe_rsu_kd_[0];
+  cmd.left_rsu_lower_kd  = last_safe_rsu_kd_[1];
+  cmd.right_rsu_upper_kd = last_safe_rsu_kd_[2];
+  cmd.right_rsu_lower_kd = last_safe_rsu_kd_[3];
 
   printControlDebug(cmd, rsu_ok);
 

@@ -466,65 +466,65 @@ class RSURtImpedanceSolverNode(Node):
         self._last_stamp = stamp
         return True
 
-    def _filter_rsu_target(
-        self,
-        target_2d: np.ndarray,
-        stamp,
-    ) -> np.ndarray:
-        target_2d = np.asarray(
-            target_2d,
-            dtype=np.float64,
-        ).reshape(2, 2)
+    # def _filter_rsu_target(
+    #     self,
+    #     target_2d: np.ndarray,
+    #     stamp,
+    # ) -> np.ndarray:
+    #     target_2d = np.asarray(
+    #         target_2d,
+    #         dtype=np.float64,
+    #     ).reshape(2, 2)
 
-        stamp_ns = stamp_to_ns(stamp)
+    #     stamp_ns = stamp_to_ns(stamp)
 
-        if not self.target_lpf_enable:
-            self.target_lpf_2d = target_2d.copy()
-            self.target_lpf_initialized = True
-            self._last_target_lpf_stamp_ns = stamp_ns
-            return target_2d.copy()
+    #     if not self.target_lpf_enable:
+    #         self.target_lpf_2d = target_2d.copy()
+    #         self.target_lpf_initialized = True
+    #         self._last_target_lpf_stamp_ns = stamp_ns
+    #         return target_2d.copy()
 
-        cutoff_hz = float(self.target_lpf_cutoff_hz)
+    #     cutoff_hz = float(self.target_lpf_cutoff_hz)
 
-        if not np.isfinite(cutoff_hz) or cutoff_hz <= 0.0:
-            self.get_logger().warn(
-                f"Invalid target_lpf_cutoff_hz={cutoff_hz}. Bypassing LPF.",
-                throttle_duration_sec=1.0,
-            )
-            self.target_lpf_2d = target_2d.copy()
-            self.target_lpf_initialized = True
-            self._last_target_lpf_stamp_ns = stamp_ns
-            return target_2d.copy()
+    #     if not np.isfinite(cutoff_hz) or cutoff_hz <= 0.0:
+    #         self.get_logger().warn(
+    #             f"Invalid target_lpf_cutoff_hz={cutoff_hz}. Bypassing LPF.",
+    #             throttle_duration_sec=1.0,
+    #         )
+    #         self.target_lpf_2d = target_2d.copy()
+    #         self.target_lpf_initialized = True
+    #         self._last_target_lpf_stamp_ns = stamp_ns
+    #         return target_2d.copy()
 
-        if (
-            not self.target_lpf_initialized
-            or self._last_target_lpf_stamp_ns is None
-        ):
-            self.target_lpf_2d = target_2d.copy()
-            self.target_lpf_initialized = True
-            self._last_target_lpf_stamp_ns = stamp_ns
-            return self.target_lpf_2d.copy()
+    #     if (
+    #         not self.target_lpf_initialized
+    #         or self._last_target_lpf_stamp_ns is None
+    #     ):
+    #         self.target_lpf_2d = target_2d.copy()
+    #         self.target_lpf_initialized = True
+    #         self._last_target_lpf_stamp_ns = stamp_ns
+    #         return self.target_lpf_2d.copy()
 
-        dt = (stamp_ns - self._last_target_lpf_stamp_ns) * 1e-9
-        self._last_target_lpf_stamp_ns = stamp_ns
+    #     dt = (stamp_ns - self._last_target_lpf_stamp_ns) * 1e-9
+    #     self._last_target_lpf_stamp_ns = stamp_ns
 
-        if not np.isfinite(dt) or dt <= 0.0:
-            self.get_logger().warn(
-                f"Invalid target LPF dt={dt}. Holding previous target.",
-                throttle_duration_sec=1.0,
-            )
-            return self.target_lpf_2d.copy()
+    #     if not np.isfinite(dt) or dt <= 0.0:
+    #         self.get_logger().warn(
+    #             f"Invalid target LPF dt={dt}. Holding previous target.",
+    #             throttle_duration_sec=1.0,
+    #         )
+    #         return self.target_lpf_2d.copy()
 
-        tau = 1.0 / (2.0 * np.pi * cutoff_hz)
-        gamma = dt / (tau + dt)
-        gamma = float(np.clip(gamma, 0.0, 1.0))
+    #     tau = 1.0 / (2.0 * np.pi * cutoff_hz)
+    #     gamma = dt / (tau + dt)
+    #     gamma = float(np.clip(gamma, 0.0, 1.0))
 
-        self.target_lpf_2d = (
-            self.target_lpf_2d
-            + gamma * (target_2d - self.target_lpf_2d)
-        )
+    #     self.target_lpf_2d = (
+    #         self.target_lpf_2d
+    #         + gamma * (target_2d - self.target_lpf_2d)
+    #     )
 
-        return self.target_lpf_2d.copy()
+    #     return self.target_lpf_2d.copy()
 
     def _on_both_foot_request(self, msg: RsuTarget):
         if not self._accept_target_order(msg.seq, msg.header.stamp):
@@ -535,27 +535,27 @@ class RSURtImpedanceSolverNode(Node):
             return
 
         # External command convention
-        l_roll_raw = float(msg.left_roll)
-        l_pitch_raw = float(msg.left_pitch)
+        l_roll = float(msg.left_roll)
+        l_pitch = float(msg.left_pitch)
 
         # Convert right-foot command to internal solver convention
-        r_roll_raw = -float(msg.right_roll)
-        r_pitch_raw = -float(msg.right_pitch)
+        r_roll = -float(msg.right_roll)
+        r_pitch = -float(msg.right_pitch)
 
-        target_raw_2d = np.array([
-            [l_roll_raw, l_pitch_raw],
-            [r_roll_raw, r_pitch_raw],
-        ], dtype=np.float64)
+        # target_raw_2d = np.array([
+        #     [l_roll_raw, l_pitch_raw],
+        #     [r_roll_raw, r_pitch_raw],
+        # ], dtype=np.float64)
 
-        target_cmd_2d = self._filter_rsu_target(
-            target_2d=target_raw_2d,
-            stamp=msg.header.stamp,
-        )
+        # target_cmd_2d = self._filter_rsu_target(
+        #     target_2d=target_raw_2d,
+        #     stamp=msg.header.stamp,
+        # )
 
-        l_roll = float(target_cmd_2d[0, 0])
-        l_pitch = float(target_cmd_2d[0, 1])
-        r_roll = float(target_cmd_2d[1, 0])
-        r_pitch = float(target_cmd_2d[1, 1])
+        # l_roll = float(target_cmd_2d[0, 0])
+        # l_pitch = float(target_cmd_2d[0, 1])
+        # r_roll = float(target_cmd_2d[1, 0])
+        # r_pitch = float(target_cmd_2d[1, 1])
 
         l_prev = self.prev_alpha_2d[0, :].copy()
         r_prev = self.prev_alpha_2d[1, :].copy()
@@ -574,13 +574,13 @@ class RSURtImpedanceSolverNode(Node):
         left_ik_ok = bool(
             l_res.feasible
             and np.all(np.isfinite(l_res.alpha))
-            and np.all(l_res.branch >= 0)
+            # and np.all(l_res.branch >= 0)
         )
 
         right_ik_ok = bool(
             r_res.feasible
             and np.all(np.isfinite(r_res.alpha))
-            and np.all(r_res.branch >= 0)
+            # and np.all(r_res.branch >= 0)
         )
 
         if left_ik_ok:
@@ -657,7 +657,7 @@ class RSURtImpedanceSolverNode(Node):
         self.pub_imp_solution.publish(out)
 
         if not out.feasible:
-            self.get_logger().warn(
+            self.get_logger().error(
                 "[RSU imp solution] fallback/degraded output | "
                 f"IK(L={left_ik_ok}, R={right_ik_ok}) | "
                 f"IMP(L={left_imp_ok}, R={right_imp_ok}) | "
