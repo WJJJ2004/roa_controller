@@ -6,7 +6,7 @@
 
 ros2 bag record -o rsu_test_001\
   /rsu/state \
-  /rsu/solution \
+  /rsu/imp_solution \
   /rsu/target \
 
 ros2 bag record  \
@@ -14,7 +14,7 @@ ros2 bag record  \
   /hardware_interface/command \
   /imu/data \
   /rsu/state \
-  /rsu/solution \
+  /rsu/imp_solution \
   /rsu/target \
   /controller/status \
   /walk_initialized
@@ -174,7 +174,7 @@ RoaControllerNode::on_configure(const rclcpp_lifecycle::State &)
     oss << "    Action Blend Action      : true\n";
     oss << "    ankle_obs_source         : virtual RSU joint state (/rsu/state)\n";
     oss << "    ankle_target_space       : virtual ankle joint target\n";
-    oss << "    ankle_actuator_source    : RSU solver output (/rsu/solution)\n";
+    oss << "    ankle_actuator_source    : RSU solver output (/rsu/imp_solution)\n";
     oss << "    cmd_stale_behavior       : zero cmd input to policy\n";
     oss << "    rsu_stale_behavior       : hold last safe RSU actuator command\n";
     oss << "    timers_start_on_activate : true\n";
@@ -413,7 +413,7 @@ void RoaControllerNode::declareAndLoadParams()
   topic_rsu_status_ = this->get_parameter("topics.rsu_state_sub").as_string();
 
   // convert ms -> Duration
-  rsu_timeout_ = rclcpp::Duration::from_seconds(rsu_timeout_ms_ / 1000.0); // /rsu/state and /rsu/solution
+  rsu_timeout_ = rclcpp::Duration::from_seconds(rsu_timeout_ms_ / 1000.0); // /rsu/state and /rsu/imp_solution
   cmd_timeout_ = rclcpp::Duration::from_seconds(cmd_timeout_ms_ / 1000.0);
   imu_timeout_ = rclcpp::Duration::from_seconds(imu_timeout_ms_ / 1000.0);
   gravity_timeout_ = rclcpp::Duration::from_seconds(gravity_timeout_ms_ / 1000.0);
@@ -936,13 +936,26 @@ void RoaControllerNode::ControlLoop()
     isFreshStamp(tnow, rsu_msg->header.stamp, rsu_timeout_);
 
   if (rsu_ok) {
-    const bool finite =
+    auto valid_gain = [](float kp, float kd) {
+      return std::isfinite(kp) &&
+            std::isfinite(kd) &&
+            kp >= 0.0f &&
+            kp <= 40.0f &&
+            kd >= 0.0f &&
+            kd <= 5.0f;
+    };
+    const bool valid =
       std::isfinite(rsu_msg->left_actuator_1.q_target)  &&
       std::isfinite(rsu_msg->left_actuator_2.q_target)  &&
       std::isfinite(rsu_msg->right_actuator_1.q_target) &&
-      std::isfinite(rsu_msg->right_actuator_2.q_target);
+      std::isfinite(rsu_msg->right_actuator_2.q_target) &&
 
-    if (finite) {
+      valid_gain(rsu_msg->left_actuator_1.kp_eqv, rsu_msg->left_actuator_1.kd_eqv) &&
+      valid_gain(rsu_msg->left_actuator_2.kp_eqv, rsu_msg->left_actuator_2.kd_eqv) &&
+      valid_gain(rsu_msg->right_actuator_1.kp_eqv, rsu_msg->right_actuator_1.kd_eqv) &&
+      valid_gain(rsu_msg->right_actuator_2.kp_eqv, rsu_msg->right_actuator_2.kd_eqv);
+
+    if (valid) {
       last_safe_rsu_q_[0] = rsu_msg->left_actuator_1.q_target;
       last_safe_rsu_q_[1] = rsu_msg->left_actuator_2.q_target;
       last_safe_rsu_q_[2] = rsu_msg->right_actuator_1.q_target;

@@ -330,7 +330,7 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   std::string topic_walk_cmd_{"/walk_policy/cmd_vel"};
   std::string topic_imu_data_{"/imu/data"};
   std::string topic_imu_gravity_{"/imu/gravity"};
-  std::string topic_rsu_solution_{"/rsu/solution"};
+  std::string topic_rsu_solution_{"/rsu/imp_solution"};
   std::string topic_rsu_target_{"/rsu/target"};
   std::string topic_motor_command_{"/hardware_interface/command"};
   std::string topic_motor_state_{"/hardware_interface/state"};
