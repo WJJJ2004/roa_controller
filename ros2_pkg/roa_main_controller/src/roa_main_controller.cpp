@@ -911,9 +911,14 @@ void RoaControllerNode::ControlLoop()
 
   if (is_infer_first_run_done == false) {
     const auto init_cmd = roa::common::make_init_pose();
-
-    auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/INFERENCE_NOT_READY");
-    motor_packit_pub_->publish(msg);
+    try {
+      auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/INFERENCE_NOT_READY");
+      motor_packit_pub_->publish(msg);
+    }
+    catch (const std::exception& e) {
+      RCLCPP_ERROR(get_logger(), "Failed to build init motor command message: %s", e.what());
+      return;
+    }
     RCLCPP_WARN_THROTTLE(
       get_logger(), *get_clock(), 2000,
       "[ControlLoop] Inference not ready. Publishing init pose.");
@@ -1013,18 +1018,29 @@ void RoaControllerNode::ControlLoop()
     //   get_logger(), *get_clock(), 500,
     //   "[WalkBlend] actuator-space alpha=%.3f", alpha);
 
-    auto msg = roa_packet_manager::PacketManager::build(
-      cmd,
-      this->now(),
-      "/CTRL/RT_CONTROL");
-
-    motor_packit_pub_->publish(msg);
+    try {
+      auto msg = roa_packet_manager::PacketManager::build(
+        cmd,
+        this->now(),
+        "/CTRL/RT_CONTROL");
+      motor_packit_pub_->publish(msg);
+    }
+    catch (const std::exception& e) {
+      RCLCPP_ERROR(get_logger(), "Failed to build motor command message: %s", e.what());
+      return;
+    }
   }
   else {
     const auto init_cmd = roa::common::make_init_pose();
 
-    auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/DEBUG_MODE");
-    motor_packit_pub_->publish(msg);
+    try {
+      auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/DEBUG_MODE");
+      motor_packit_pub_->publish(msg);
+    }
+    catch (const std::exception& e) {
+      RCLCPP_ERROR(get_logger(), "Failed to build init motor command message: %s", e.what());
+      return;
+    }
   }
 }
 

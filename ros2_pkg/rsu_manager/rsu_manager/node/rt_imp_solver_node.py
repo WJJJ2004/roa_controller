@@ -690,7 +690,17 @@ class RSURtImpedanceSolverNode(Node):
                 self.default_kd.copy(),
                 False,
             )
+        kp = np.clip(
+            kp,
+            self.actuator_kp_min,
+            self.actuator_kp_max,
+        )
 
+        kd = np.clip(
+            kd,
+            self.actuator_kd_min,
+            self.actuator_kd_max,
+        )
         return kp, kd, bool(imp_result.valid)
 
     # =========================================================================

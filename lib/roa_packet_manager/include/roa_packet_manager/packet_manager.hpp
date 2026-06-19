@@ -119,7 +119,42 @@ public:
   //   {"left_rsu_lower",   20,  20.0f,  0.49f},
   //   {"right_rsu_lower",  21,  20.0f,  0.49f},
   // }};
+  static bool valid_motor_cmd(const Command12Dof& cmd)
+  {
+    const auto valid_target = [](float q) -> bool {
+      return std::isfinite(q) &&
+            (q >= -3.142f) &&
+            (q <= 3.142f);
+    };
 
+    const auto valid_gain = [](float kp, float kd) -> bool {
+      return std::isfinite(kp) &&
+            std::isfinite(kd) &&
+            (kp >= 0.0f) &&
+            (kd >= 0.0f) &&
+            (kp <= 1000.0f) &&
+            (kd <= 100.0f);
+    };
+
+    return
+      valid_target(cmd.left_hip_pitch) &&
+      valid_target(cmd.right_hip_pitch) &&
+      valid_target(cmd.left_hip_roll) &&
+      valid_target(cmd.right_hip_roll) &&
+      valid_target(cmd.left_hip_yaw) &&
+      valid_target(cmd.right_hip_yaw) &&
+      valid_target(cmd.left_knee_pitch) &&
+      valid_target(cmd.right_knee_pitch) &&
+      valid_target(cmd.left_rsu_upper) &&
+      valid_target(cmd.right_rsu_upper) &&
+      valid_target(cmd.left_rsu_lower) &&
+      valid_target(cmd.right_rsu_lower) &&
+
+      valid_gain(cmd.left_rsu_upper_kp, cmd.left_rsu_upper_kd) &&
+      valid_gain(cmd.right_rsu_upper_kp, cmd.right_rsu_upper_kd) &&
+      valid_gain(cmd.left_rsu_lower_kp, cmd.left_rsu_lower_kd) &&
+      valid_gain(cmd.right_rsu_lower_kp, cmd.right_rsu_lower_kd);
+  }
   static constexpr int motor_id_to_slot(int motor_id)
   {
     return (motor_id >= kMinMotorId && motor_id <= kMaxMotorId)
@@ -214,6 +249,10 @@ public:
     const rclcpp::Time& stamp,
     const std::string& frame_id = "")
   {
+    if (!valid_motor_cmd(cmd)) {
+      throw std::invalid_argument("Invalid motor command");
+    }
+
     roa_interfaces::msg::MotorCommandArray msg;
     msg.header.stamp = stamp;
     msg.header.frame_id = frame_id;
