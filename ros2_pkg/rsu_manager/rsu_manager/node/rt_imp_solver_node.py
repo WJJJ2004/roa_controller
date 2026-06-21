@@ -243,8 +243,8 @@ class RSURtImpedanceSolverNode(Node):
         self.declare_parameter("target_lpf_cutoff_hz", 2.0)
 
         # Desired virtual impedance
-        self.declare_parameter("virtual_pitch_kp", 40.0)
-        self.declare_parameter("virtual_pitch_kd", 10.0)
+        self.declare_parameter("virtual_pitch_kp", 20.0)
+        self.declare_parameter("virtual_pitch_kd", 5.0)
         self.declare_parameter("virtual_roll_scale", 1.37)
 
         # Actuator gain limits
@@ -253,8 +253,8 @@ class RSURtImpedanceSolverNode(Node):
         self.declare_parameter("actuator_kd_min", [0.2, 0.2])
         self.declare_parameter("actuator_kd_max", [6.0, 6.0])
 
-        self.declare_parameter("default_kp", [18.0, 18.0])
-        self.declare_parameter("default_kd", [4.5, 4.5])
+        self.declare_parameter("default_kp", [9.0, 9.0])
+        self.declare_parameter("default_kd", [2.25, 2.25])
 
         # Impedance mapping validity
         self.declare_parameter("imp_cond_warn", 10.0)

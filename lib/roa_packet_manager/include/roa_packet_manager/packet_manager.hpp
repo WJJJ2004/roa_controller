@@ -39,15 +39,15 @@ public:
     float right_rsu_lower = 0.0f;   // ID 21
 
     // interface for Impedance Control of RSU joints
-    float left_rsu_upper_kp = 18.0f;
-    float right_rsu_upper_kp = 18.0f;
-    float left_rsu_lower_kp = 18.0f;
-    float right_rsu_lower_kp = 18.0f;
+    float left_rsu_upper_kp = 9.0f;
+    float right_rsu_upper_kp = 9.0f;
+    float left_rsu_lower_kp = 9.0f;
+    float right_rsu_lower_kp = 9.0f;
 
-    float left_rsu_upper_kd = 5.0f;
-    float right_rsu_upper_kd = 5.0f;
-    float left_rsu_lower_kd = 5.0f;
-    float right_rsu_lower_kd = 5.0f;
+    float left_rsu_upper_kd = 2.5f;
+    float right_rsu_upper_kd = 2.5f;
+    float left_rsu_lower_kd = 2.5f;
+    float right_rsu_lower_kd = 2.5f;
   };
 
   struct JointMeta

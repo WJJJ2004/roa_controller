@@ -303,8 +303,8 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   }
 
   std::array<float, 4> last_safe_rsu_q_{0.f, 0.f, 0.f, 0.f};
-  std::array<float, 4> last_safe_rsu_kp_{18.0f, 18.0f, 18.0f, 18.0f};
-  std::array<float, 4> last_safe_rsu_kd_{5.0f, 5.0f, 5.0f, 5.0f};
+  std::array<float, 4> last_safe_rsu_kp_{9.0f, 9.0f, 9.0f, 9.0f};
+  std::array<float, 4> last_safe_rsu_kd_{2.5f, 2.5f, 2.5f, 2.5f};
 
   // ++++++++++++++++++++++++++++++++++++++++
   // last hw command latch

@@ -6,7 +6,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     pkg = FindPackageShare("rsu_manager")
-    param_file = PathJoinSubstitution([pkg, "config", "rsu_hw_test.yaml"])
+    param_file = PathJoinSubstitution([pkg, "config", "rsu_imp_test.yaml"])
 
     return LaunchDescription([
         Node(

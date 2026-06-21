@@ -55,8 +55,8 @@ class RSUImpedanceMapperConfig:
     # Desired virtual ankle impedance
     # Axis order: [roll, pitch]
     # ------------------------------------------------------------------
-    virtual_pitch_kp: float = 40.0
-    virtual_pitch_kd: float = 10.0
+    virtual_pitch_kp: float = 20.0
+    virtual_pitch_kd: float = 5.0
     virtual_roll_scale: float = 1.37
 
     # ------------------------------------------------------------------
@@ -79,10 +79,10 @@ class RSUImpedanceMapperConfig:
 
     # Initial fallback values before the first valid mapping
     default_kp: np.ndarray = field(
-        default_factory=lambda: np.array([18.0, 18.0], dtype=np.float64)
+        default_factory=lambda: np.array([9.0, 9.0], dtype=np.float64)
     )
     default_kd: np.ndarray = field(
-        default_factory=lambda: np.array([4.5, 4.5], dtype=np.float64)
+        default_factory=lambda: np.array([2.25, 2.25], dtype=np.float64)
     )
 
     # ------------------------------------------------------------------

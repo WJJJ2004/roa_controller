@@ -139,8 +139,8 @@ class RsuHwGamepadTestNode(Node):
         # ===== RSU actuator command state =====
         self.rsu_solution_ready = False
 
-        self.default_rsu_kp = 18.0
-        self.default_rsu_kd = 4.5
+        self.default_rsu_kp = 9.0
+        self.default_rsu_kd = 2.5
         
         self.actuator_cmd = {
             18: None,  # left actuator 1
