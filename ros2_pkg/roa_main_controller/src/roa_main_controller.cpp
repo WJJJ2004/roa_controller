@@ -520,12 +520,15 @@ bool RoaControllerNode::build_observation(const rclcpp::Time& tnow)
     obs_.cmd[0] = static_cast<float>(cmd_msg->linear.x);
     obs_.cmd[1] = static_cast<float>(cmd_msg->linear.y);
     obs_.cmd[2] = static_cast<float>(cmd_msg->angular.z);
+
+    last_command_buffer_[0] = static_cast<float>(cmd_msg->linear.x);
+    last_command_buffer_[1] = static_cast<float>(cmd_msg->linear.y);
+    last_command_buffer_[2] = static_cast<float>(cmd_msg->angular.z);
   } 
   else {
-    // TODO ONLY FOR DEBUG !! SHOULD BE REMOVED OR REPLACED WITH SAFETY BEHAVIOR (E.G. HOLD LAST CMD OR ZERO CMD)
-    obs_.cmd[0] = 0.0f;
-    obs_.cmd[1] = 0.0f;
-    obs_.cmd[2] = 0.0f;
+    obs_.cmd[0] = last_command_buffer_[0];
+    obs_.cmd[1] = last_command_buffer_[1];
+    obs_.cmd[2] = last_command_buffer_[2];
   }
 
   // 2) imu
