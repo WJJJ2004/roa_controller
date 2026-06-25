@@ -17,8 +17,8 @@ class PacketManager
 {
 public:
 
-  static constexpr float kp_scale = 0.6f; // 0.375f; // 0.25
-  static constexpr float kd_scale = 0.3f; // 0.3f; // 0.1
+  static constexpr float kp_scale = 1.0f; // 0.375f; // 0.25
+  static constexpr float kd_scale = 1.0f; // 0.3f; // 0.1
 
   // static constexpr float rsu_kp_scale = 0.5f; // 0.375f; // 0.25
   // static constexpr float rsu_kd_scale = 0.5f; // 0.3f; // 0.1
@@ -39,10 +39,10 @@ public:
     float right_rsu_lower = 0.0f;   // ID 21
 
     // interface for Impedance Control of RSU joints
-    float left_rsu_upper_kp = 9.0f;
-    float right_rsu_upper_kp = 9.0f;
-    float left_rsu_lower_kp = 9.0f;
-    float right_rsu_lower_kp = 9.0f;
+    float left_rsu_upper_kp = 15.75f;
+    float right_rsu_upper_kp = 15.75f;
+    float left_rsu_lower_kp = 15.75f;
+    float right_rsu_lower_kp = 15.75f;
 
     float left_rsu_upper_kd = 2.5f;
     float right_rsu_upper_kd = 2.5f;
@@ -90,19 +90,35 @@ public:
 
   static constexpr std::array<JointMeta, kMotorCount> kJointMetaTable{{
     {"torso_yaw",         9,  50.0f,  2.0f},
-    {"left_hip_pitch",   10, 150.0f, 24.722f},
-    {"right_hip_pitch",  11, 150.0f, 24.722f},
-    {"left_hip_roll",    12, 200.0f, 26.387f},
-    {"right_hip_roll",   13, 200.0f, 26.387f},
-    {"left_hip_yaw",     14, 100.0f,  3.419f},
-    {"right_hip_yaw",    15, 100.0f,  3.419f},
-    {"left_knee_pitch",  16, 150.0f,  8.654f},
-    {"right_knee_pitch", 17, 150.0f,  8.654f},
+    {"left_hip_pitch",   10, 150.0f, 13.0f},
+    {"right_hip_pitch",  11, 150.0f, 13.0f},
+    {"left_hip_roll",    12, 200.0f, 15.0f},
+    {"right_hip_roll",   13, 200.0f, 15.0f},
+    {"left_hip_yaw",     14, 100.0f,  3.0f},
+    {"right_hip_yaw",    15, 100.0f,  3.0f},
+    {"left_knee_pitch",  16, 150.0f,  5.0f},
+    {"right_knee_pitch", 17, 150.0f,  5.0f},
     {"left_rsu_upper",   18,  40.0f,  0.99f},
     {"right_rsu_upper",  19,  40.0f,  0.99f},
     {"left_rsu_lower",   20,  40.0f,  0.99f},
     {"right_rsu_lower",  21,  40.0f,  0.99f},
   }};
+
+  // static constexpr std::array<JointMeta, kMotorCount> kJointMetaTable{{
+  //   {"torso_yaw",         9,  50.0f,  2.0f},
+  //   {"left_hip_pitch",   10, 150.0f, 7.0f},
+  //   {"right_hip_pitch",  11, 150.0f, 7.0f},
+  //   {"left_hip_roll",    12, 200.0f, 10.0f},
+  //   {"right_hip_roll",   13, 200.0f, 10.0f},
+  //   {"left_hip_yaw",     14, 100.0f,  3.0f},
+  //   {"right_hip_yaw",    15, 100.0f,  3.0f},
+  //   {"left_knee_pitch",  16, 150.0f,  5.0f},
+  //   {"right_knee_pitch", 17, 150.0f,  5.0f},
+  //   {"left_rsu_upper",   18,  40.0f,  0.99f},
+  //   {"right_rsu_upper",  19,  40.0f,  0.99f},
+  //   {"left_rsu_lower",   20,  40.0f,  0.99f},
+  //   {"right_rsu_lower",  21,  40.0f,  0.99f},
+  // }};
 
   // static constexpr std::array<JointMeta, kMotorCount> kJointMetaTable{{
   //   {"torso_yaw",         9,  50.0f,  2.0f},

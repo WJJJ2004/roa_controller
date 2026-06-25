@@ -793,12 +793,20 @@ void RoaControllerNode::InferenceLoop()
 
   // TODO 
   // THIS IS TEST FOR INITIAL SAFE ACTION
-  if (is_infer_first_run_done == false) {
-    RCLCPP_INFO(get_logger(), "[InferenceLoop] First run - observation buffers initialized with zeros");
-    roa::policy::iface::Policy12DofV2::fill_zero_obs(obs_);
-    roa::policy::iface::Policy12DofV2::pack_obs(obs_, obs_buffer_.data());
-  }
-  else if (!build_observation(tnow)) {
+  // if (is_infer_first_run_done == false) {
+  //   RCLCPP_INFO(get_logger(), "[InferenceLoop] First run - observation buffers initialized with zeros");
+  //   roa::policy::iface::Policy12DofV2::fill_zero_obs(obs_);
+  //   roa::policy::iface::Policy12DofV2::pack_obs(obs_, obs_buffer_.data());
+  // }
+  // else if (!build_observation(tnow)) {
+  //   RCLCPP_WARN_THROTTLE(
+  //     get_logger(), *get_clock(), 2000,
+  //     "[InferenceLoop] Observation build failed");
+  //   return;
+  // }
+
+
+  if (!build_observation(tnow)) {
     RCLCPP_WARN_THROTTLE(
       get_logger(), *get_clock(), 2000,
       "[InferenceLoop] Observation build failed");
