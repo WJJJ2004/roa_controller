@@ -19,6 +19,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/SystemStatus.msg"
   "msg/RsuState.msg"
   "msg/RsuStateArray.msg"
+  "msg/RsuActuator.msg"
+  "msg/RsuImpSol.msg"
   DEPENDENCIES std_msgs
 )
 

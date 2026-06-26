@@ -23,7 +23,7 @@ roa_main_controller:
       walk_policy_cmd: /ctrl/policy_cmd
       imu_data: /imu/data
       imu_gravity: /imu/gravity
-      rsu_solution: /rsu/solution
+      rsu_solution: /rsu/imp_solution
       rsu_target: /rsu/target
       motor_command: /hardware_interface/command
       motor_state_sub: /hardware_interface/state

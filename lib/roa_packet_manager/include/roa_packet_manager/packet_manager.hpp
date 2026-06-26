@@ -17,11 +17,11 @@ class PacketManager
 {
 public:
 
-  static constexpr float kp_scale = 0.6f; // 0.375f; // 0.25
-  static constexpr float kd_scale = 0.3f; // 0.3f; // 0.1
+  static constexpr float kp_scale = 1.0f; // 0.375f; // 0.25
+  static constexpr float kd_scale = 1.0f; // 0.3f; // 0.1
 
-  static constexpr float rsu_kp_scale = 0.5f; // 0.375f; // 0.25
-  static constexpr float rsu_kd_scale = 0.5f; // 0.3f; // 0.1
+  // static constexpr float rsu_kp_scale = 0.5f; // 0.375f; // 0.25
+  // static constexpr float rsu_kd_scale = 0.5f; // 0.3f; // 0.1
 
   struct Command12Dof
   {
@@ -37,6 +37,17 @@ public:
     float right_rsu_upper = 0.0f;   // ID 19
     float left_rsu_lower  = 0.0f;   // ID 20
     float right_rsu_lower = 0.0f;   // ID 21
+
+    // interface for Impedance Control of RSU joints
+    float left_rsu_upper_kp = 15.75f;
+    float right_rsu_upper_kp = 15.75f;
+    float left_rsu_lower_kp = 15.75f;
+    float right_rsu_lower_kp = 15.75f;
+
+    float left_rsu_upper_kd = 2.5f;
+    float right_rsu_upper_kd = 2.5f;
+    float left_rsu_lower_kd = 2.5f;
+    float right_rsu_lower_kd = 2.5f;
   };
 
   struct JointMeta
@@ -79,19 +90,35 @@ public:
 
   static constexpr std::array<JointMeta, kMotorCount> kJointMetaTable{{
     {"torso_yaw",         9,  50.0f,  2.0f},
-    {"left_hip_pitch",   10, 150.0f, 24.722f},
-    {"right_hip_pitch",  11, 150.0f, 24.722f},
-    {"left_hip_roll",    12, 200.0f, 26.387f},
-    {"right_hip_roll",   13, 200.0f, 26.387f},
-    {"left_hip_yaw",     14, 100.0f,  3.419f},
-    {"right_hip_yaw",    15, 100.0f,  3.419f},
-    {"left_knee_pitch",  16, 150.0f,  8.654f},
-    {"right_knee_pitch", 17, 150.0f,  8.654f},
+    {"left_hip_pitch",   10, 180.0f, 24.0f},
+    {"right_hip_pitch",  11, 180.0f, 24.0f},
+    {"left_hip_roll",    12, 200.0f, 25.0f},
+    {"right_hip_roll",   13, 200.0f, 25.0f},
+    {"left_hip_yaw",     14, 100.0f,  3.0f},
+    {"right_hip_yaw",    15, 100.0f,  3.0f},
+    {"left_knee_pitch",  16, 180.0f,  8.0f},
+    {"right_knee_pitch", 17, 180.0f,  8.0f},
     {"left_rsu_upper",   18,  40.0f,  0.99f},
     {"right_rsu_upper",  19,  40.0f,  0.99f},
     {"left_rsu_lower",   20,  40.0f,  0.99f},
     {"right_rsu_lower",  21,  40.0f,  0.99f},
   }};
+
+  // static constexpr std::array<JointMeta, kMotorCount> kJointMetaTable{{
+  //   {"torso_yaw",         9,  50.0f,  2.0f},
+  //   {"left_hip_pitch",   10, 150.0f, 7.0f},
+  //   {"right_hip_pitch",  11, 150.0f, 7.0f},
+  //   {"left_hip_roll",    12, 200.0f, 10.0f},
+  //   {"right_hip_roll",   13, 200.0f, 10.0f},
+  //   {"left_hip_yaw",     14, 100.0f,  3.0f},
+  //   {"right_hip_yaw",    15, 100.0f,  3.0f},
+  //   {"left_knee_pitch",  16, 150.0f,  5.0f},
+  //   {"right_knee_pitch", 17, 150.0f,  5.0f},
+  //   {"left_rsu_upper",   18,  40.0f,  0.99f},
+  //   {"right_rsu_upper",  19,  40.0f,  0.99f},
+  //   {"left_rsu_lower",   20,  40.0f,  0.99f},
+  //   {"right_rsu_lower",  21,  40.0f,  0.99f},
+  // }};
 
   // static constexpr std::array<JointMeta, kMotorCount> kJointMetaTable{{
   //   {"torso_yaw",         9,  50.0f,  2.0f},
@@ -108,7 +135,42 @@ public:
   //   {"left_rsu_lower",   20,  20.0f,  0.49f},
   //   {"right_rsu_lower",  21,  20.0f,  0.49f},
   // }};
+  static bool valid_motor_cmd(const Command12Dof& cmd)
+  {
+    const auto valid_target = [](float q) -> bool {
+      return std::isfinite(q) &&
+            (q >= -3.142f) &&
+            (q <= 3.142f);
+    };
 
+    const auto valid_gain = [](float kp, float kd) -> bool {
+      return std::isfinite(kp) &&
+            std::isfinite(kd) &&
+            (kp >= 0.0f) &&
+            (kd >= 0.0f) &&
+            (kp <= 1000.0f) &&
+            (kd <= 100.0f);
+    };
+
+    return
+      valid_target(cmd.left_hip_pitch) &&
+      valid_target(cmd.right_hip_pitch) &&
+      valid_target(cmd.left_hip_roll) &&
+      valid_target(cmd.right_hip_roll) &&
+      valid_target(cmd.left_hip_yaw) &&
+      valid_target(cmd.right_hip_yaw) &&
+      valid_target(cmd.left_knee_pitch) &&
+      valid_target(cmd.right_knee_pitch) &&
+      valid_target(cmd.left_rsu_upper) &&
+      valid_target(cmd.right_rsu_upper) &&
+      valid_target(cmd.left_rsu_lower) &&
+      valid_target(cmd.right_rsu_lower) &&
+
+      valid_gain(cmd.left_rsu_upper_kp, cmd.left_rsu_upper_kd) &&
+      valid_gain(cmd.right_rsu_upper_kp, cmd.right_rsu_upper_kd) &&
+      valid_gain(cmd.left_rsu_lower_kp, cmd.left_rsu_lower_kd) &&
+      valid_gain(cmd.right_rsu_lower_kp, cmd.right_rsu_lower_kd);
+  }
   static constexpr int motor_id_to_slot(int motor_id)
   {
     return (motor_id >= kMinMotorId && motor_id <= kMaxMotorId)
@@ -203,6 +265,10 @@ public:
     const rclcpp::Time& stamp,
     const std::string& frame_id = "")
   {
+    if (!valid_motor_cmd(cmd)) {
+      throw std::invalid_argument("Invalid motor command");
+    }
+
     roa_interfaces::msg::MotorCommandArray msg;
     msg.header.stamp = stamp;
     msg.header.frame_id = frame_id;
@@ -213,22 +279,22 @@ public:
       kJointMetaTable[0].motor_id,
       0.0f, // position
       kp_scale * kJointMetaTable[0].kp,
-      kp_scale * kJointMetaTable[0].kd));
+      kd_scale * kJointMetaTable[0].kd));
 
     // ID 10 ~ 21 from external 12DOF command contract
     // clang-format off
-    msg.commands.push_back(make_command(kJointMetaTable[1].motor_id,  cmd.left_hip_pitch,   kp_scale * kJointMetaTable[1].kp,  kp_scale * kJointMetaTable[1].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[2].motor_id,  cmd.right_hip_pitch,  kp_scale * kJointMetaTable[2].kp,  kp_scale * kJointMetaTable[2].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[3].motor_id,  cmd.left_hip_roll,    kp_scale * kJointMetaTable[3].kp,  kp_scale * kJointMetaTable[3].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[4].motor_id,  cmd.right_hip_roll,   kp_scale * kJointMetaTable[4].kp,  kp_scale * kJointMetaTable[4].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[5].motor_id,  cmd.left_hip_yaw,     kp_scale * kJointMetaTable[5].kp,  kp_scale * kJointMetaTable[5].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[6].motor_id,  cmd.right_hip_yaw,    kp_scale * kJointMetaTable[6].kp,  kp_scale * kJointMetaTable[6].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[7].motor_id,  cmd.left_knee_pitch,  kp_scale * kJointMetaTable[7].kp,  kp_scale * kJointMetaTable[7].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[8].motor_id,  cmd.right_knee_pitch, kp_scale * kJointMetaTable[8].kp,  kp_scale * kJointMetaTable[8].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[9].motor_id,  cmd.left_rsu_upper,   rsu_kp_scale * kJointMetaTable[9].kp,  rsu_kd_scale * kJointMetaTable[9].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[10].motor_id, cmd.right_rsu_upper,  rsu_kp_scale * kJointMetaTable[10].kp, rsu_kd_scale * kJointMetaTable[10].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[11].motor_id, cmd.left_rsu_lower,   rsu_kp_scale * kJointMetaTable[11].kp, rsu_kd_scale * kJointMetaTable[11].kd));
-    msg.commands.push_back(make_command(kJointMetaTable[12].motor_id, cmd.right_rsu_lower,  rsu_kp_scale * kJointMetaTable[12].kp, rsu_kd_scale * kJointMetaTable[12].kd));
+    msg.commands.push_back(make_command(kJointMetaTable[1].motor_id,  cmd.left_hip_pitch,   kp_scale * kJointMetaTable[1].kp,  kd_scale * kJointMetaTable[1].kd));
+    msg.commands.push_back(make_command(kJointMetaTable[2].motor_id,  cmd.right_hip_pitch,  kp_scale * kJointMetaTable[2].kp,  kd_scale * kJointMetaTable[2].kd));
+    msg.commands.push_back(make_command(kJointMetaTable[3].motor_id,  cmd.left_hip_roll,    kp_scale * kJointMetaTable[3].kp,  kd_scale * kJointMetaTable[3].kd));
+    msg.commands.push_back(make_command(kJointMetaTable[4].motor_id,  cmd.right_hip_roll,   kp_scale * kJointMetaTable[4].kp,  kd_scale * kJointMetaTable[4].kd));
+    msg.commands.push_back(make_command(kJointMetaTable[5].motor_id,  cmd.left_hip_yaw,     kp_scale * kJointMetaTable[5].kp,  kd_scale * kJointMetaTable[5].kd));
+    msg.commands.push_back(make_command(kJointMetaTable[6].motor_id,  cmd.right_hip_yaw,    kp_scale * kJointMetaTable[6].kp,  kd_scale * kJointMetaTable[6].kd));
+    msg.commands.push_back(make_command(kJointMetaTable[7].motor_id,  cmd.left_knee_pitch,  kp_scale * kJointMetaTable[7].kp,  kd_scale * kJointMetaTable[7].kd));
+    msg.commands.push_back(make_command(kJointMetaTable[8].motor_id,  cmd.right_knee_pitch, kp_scale * kJointMetaTable[8].kp,  kd_scale * kJointMetaTable[8].kd));
+    msg.commands.push_back(make_command(kJointMetaTable[9].motor_id,  cmd.left_rsu_upper,   cmd.left_rsu_upper_kp,  cmd.left_rsu_upper_kd));
+    msg.commands.push_back(make_command(kJointMetaTable[10].motor_id, cmd.right_rsu_upper,  cmd.right_rsu_upper_kp, cmd.right_rsu_upper_kd));
+    msg.commands.push_back(make_command(kJointMetaTable[11].motor_id, cmd.left_rsu_lower,   cmd.left_rsu_lower_kp,  cmd.left_rsu_lower_kd));
+    msg.commands.push_back(make_command(kJointMetaTable[12].motor_id, cmd.right_rsu_lower,  cmd.right_rsu_lower_kp, cmd.right_rsu_lower_kd));
     // clang-format on
 
     return msg;

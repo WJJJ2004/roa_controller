@@ -6,7 +6,7 @@
 
 ros2 bag record -o rsu_test_001\
   /rsu/state \
-  /rsu/solution \
+  /rsu/imp_solution \
   /rsu/target \
 
 ros2 bag record  \
@@ -14,7 +14,7 @@ ros2 bag record  \
   /hardware_interface/command \
   /imu/data \
   /rsu/state \
-  /rsu/solution \
+  /rsu/imp_solution \
   /rsu/target \
   /controller/status \
   /walk_initialized
@@ -122,7 +122,7 @@ RoaControllerNode::on_configure(const rclcpp_lifecycle::State &)
   // last_hw_cmd_.data.resize(static_cast<size_t>(std::max(0, walk_len_)), 0.0f);
 
   // 내부 상태 초기화
-  last_safe_rsu_ = initLastSafeRsu();
+  last_safe_rsu_q_ = initLastSafeRsu();
   rsu_seq_ = 0;
   policy_loaded_ = false;
   last_policy_update_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
@@ -174,7 +174,7 @@ RoaControllerNode::on_configure(const rclcpp_lifecycle::State &)
     oss << "    Action Blend Action      : true\n";
     oss << "    ankle_obs_source         : virtual RSU joint state (/rsu/state)\n";
     oss << "    ankle_target_space       : virtual ankle joint target\n";
-    oss << "    ankle_actuator_source    : RSU solver output (/rsu/solution)\n";
+    oss << "    ankle_actuator_source    : RSU solver output (/rsu/imp_solution)\n";
     oss << "    cmd_stale_behavior       : zero cmd input to policy\n";
     oss << "    rsu_stale_behavior       : hold last safe RSU actuator command\n";
     oss << "    timers_start_on_activate : true\n";
@@ -278,7 +278,7 @@ RoaControllerNode::on_cleanup(const rclcpp_lifecycle::State &)
 
   policy_loaded_ = false;
 
-  last_safe_rsu_ = initLastSafeRsu();
+  last_safe_rsu_q_ = initLastSafeRsu();
   rsu_seq_ = 0;
 
   return CallbackReturn::SUCCESS;
@@ -413,7 +413,7 @@ void RoaControllerNode::declareAndLoadParams()
   topic_rsu_status_ = this->get_parameter("topics.rsu_state_sub").as_string();
 
   // convert ms -> Duration
-  rsu_timeout_ = rclcpp::Duration::from_seconds(rsu_timeout_ms_ / 1000.0); // /rsu/state and /rsu/solution
+  rsu_timeout_ = rclcpp::Duration::from_seconds(rsu_timeout_ms_ / 1000.0); // /rsu/state and /rsu/imp_solution
   cmd_timeout_ = rclcpp::Duration::from_seconds(cmd_timeout_ms_ / 1000.0);
   imu_timeout_ = rclcpp::Duration::from_seconds(imu_timeout_ms_ / 1000.0);
   gravity_timeout_ = rclcpp::Duration::from_seconds(gravity_timeout_ms_ / 1000.0);
@@ -520,12 +520,15 @@ bool RoaControllerNode::build_observation(const rclcpp::Time& tnow)
     obs_.cmd[0] = static_cast<float>(cmd_msg->linear.x);
     obs_.cmd[1] = static_cast<float>(cmd_msg->linear.y);
     obs_.cmd[2] = static_cast<float>(cmd_msg->angular.z);
+
+    last_command_buffer_[0] = static_cast<float>(cmd_msg->linear.x);
+    last_command_buffer_[1] = static_cast<float>(cmd_msg->linear.y);
+    last_command_buffer_[2] = static_cast<float>(cmd_msg->angular.z);
   } 
   else {
-    // TODO ONLY FOR DEBUG !! SHOULD BE REMOVED OR REPLACED WITH SAFETY BEHAVIOR (E.G. HOLD LAST CMD OR ZERO CMD)
-    obs_.cmd[0] = 0.0f;
-    obs_.cmd[1] = 0.0f;
-    obs_.cmd[2] = 0.0f;
+    obs_.cmd[0] = last_command_buffer_[0];
+    obs_.cmd[1] = last_command_buffer_[1];
+    obs_.cmd[2] = last_command_buffer_[2];
   }
 
   // 2) imu
@@ -696,7 +699,7 @@ void RoaControllerNode::setupRosInterfaces()
   gravity_sub_ = create_subscription<geometry_msgs::msg::Vector3Stamped>(
     topic_imu_gravity_, imu_qos, std::bind(&RoaControllerNode::onGravity, this, std::placeholders::_1));
 
-  rsu_solution_sub_ = create_subscription<roa_interfaces::msg::RsuSolution>(
+  rsu_solution_sub_ = create_subscription<roa_interfaces::msg::RsuImpSol>(
     topic_rsu_solution_, rsu_qos, std::bind(&RoaControllerNode::onRsuSolution, this, std::placeholders::_1));
   motor_state_sub_  = create_subscription<roa_interfaces::msg::MotorStateArray>(
     topic_motor_state_, motor_status_qos, std::bind(&RoaControllerNode::onMotorStatus, this, std::placeholders::_1));
@@ -737,7 +740,7 @@ void RoaControllerNode::onGravity(geometry_msgs::msg::Vector3Stamped::SharedPtr 
   gravity_latch_.set(std::move(msg), now());
 }
 
-void RoaControllerNode::onRsuSolution(roa_interfaces::msg::RsuSolution::SharedPtr msg)
+void RoaControllerNode::onRsuSolution(roa_interfaces::msg::RsuImpSol::SharedPtr msg)
 {
   rsu_latch_.set(std::move(msg), now());
 }
@@ -790,12 +793,20 @@ void RoaControllerNode::InferenceLoop()
 
   // TODO 
   // THIS IS TEST FOR INITIAL SAFE ACTION
-  if (is_infer_first_run_done == false) {
-    RCLCPP_INFO(get_logger(), "[InferenceLoop] First run - observation buffers initialized with zeros");
-    roa::policy::iface::Policy12DofV2::fill_zero_obs(obs_);
-    roa::policy::iface::Policy12DofV2::pack_obs(obs_, obs_buffer_.data());
-  }
-  else if (!build_observation(tnow)) {
+  // if (is_infer_first_run_done == false) {
+  //   RCLCPP_INFO(get_logger(), "[InferenceLoop] First run - observation buffers initialized with zeros");
+  //   roa::policy::iface::Policy12DofV2::fill_zero_obs(obs_);
+  //   roa::policy::iface::Policy12DofV2::pack_obs(obs_, obs_buffer_.data());
+  // }
+  // else if (!build_observation(tnow)) {
+  //   RCLCPP_WARN_THROTTLE(
+  //     get_logger(), *get_clock(), 2000,
+  //     "[InferenceLoop] Observation build failed");
+  //   return;
+  // }
+
+
+  if (!build_observation(tnow)) {
     RCLCPP_WARN_THROTTLE(
       get_logger(), *get_clock(), 2000,
       "[InferenceLoop] Observation build failed");
@@ -911,9 +922,14 @@ void RoaControllerNode::ControlLoop()
 
   if (is_infer_first_run_done == false) {
     const auto init_cmd = roa::common::make_init_pose();
-
-    auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/INFERENCE_NOT_READY");
-    motor_packit_pub_->publish(msg);
+    try {
+      auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/INFERENCE_NOT_READY");
+      motor_packit_pub_->publish(msg);
+    }
+    catch (const std::exception& e) {
+      RCLCPP_ERROR(get_logger(), "Failed to build init motor command message: %s", e.what());
+      return;
+    }
     RCLCPP_WARN_THROTTLE(
       get_logger(), *get_clock(), 2000,
       "[ControlLoop] Inference not ready. Publishing init pose.");
@@ -936,17 +952,40 @@ void RoaControllerNode::ControlLoop()
     isFreshStamp(tnow, rsu_msg->header.stamp, rsu_timeout_);
 
   if (rsu_ok) {
-    const bool finite =
-      std::isfinite(rsu_msg->left_actuator_1)  &&
-      std::isfinite(rsu_msg->left_actuator_2)  &&
-      std::isfinite(rsu_msg->right_actuator_1) &&
-      std::isfinite(rsu_msg->right_actuator_2);
+    auto valid_gain = [](float kp, float kd) {
+      return std::isfinite(kp) &&
+            std::isfinite(kd) &&
+            kp >= 0.0f &&
+            kp <= 40.0f &&
+            kd >= 0.0f &&
+            kd <= 5.0f;
+    };
+    const bool valid =
+      std::isfinite(rsu_msg->left_actuator_1.q_target)  &&
+      std::isfinite(rsu_msg->left_actuator_2.q_target)  &&
+      std::isfinite(rsu_msg->right_actuator_1.q_target) &&
+      std::isfinite(rsu_msg->right_actuator_2.q_target) &&
 
-    if (finite) {
-      last_safe_rsu_[0] = rsu_msg->left_actuator_1;
-      last_safe_rsu_[1] = rsu_msg->left_actuator_2;
-      last_safe_rsu_[2] = rsu_msg->right_actuator_1;
-      last_safe_rsu_[3] = rsu_msg->right_actuator_2;
+      valid_gain(rsu_msg->left_actuator_1.kp_eqv, rsu_msg->left_actuator_1.kd_eqv) &&
+      valid_gain(rsu_msg->left_actuator_2.kp_eqv, rsu_msg->left_actuator_2.kd_eqv) &&
+      valid_gain(rsu_msg->right_actuator_1.kp_eqv, rsu_msg->right_actuator_1.kd_eqv) &&
+      valid_gain(rsu_msg->right_actuator_2.kp_eqv, rsu_msg->right_actuator_2.kd_eqv);
+
+    if (valid) {
+      last_safe_rsu_q_[0] = rsu_msg->left_actuator_1.q_target;
+      last_safe_rsu_q_[1] = rsu_msg->left_actuator_2.q_target;
+      last_safe_rsu_q_[2] = rsu_msg->right_actuator_1.q_target;
+      last_safe_rsu_q_[3] = rsu_msg->right_actuator_2.q_target;
+
+      last_safe_rsu_kp_[0] = rsu_msg->left_actuator_1.kp_eqv;
+      last_safe_rsu_kp_[1] = rsu_msg->left_actuator_2.kp_eqv;
+      last_safe_rsu_kp_[2] = rsu_msg->right_actuator_1.kp_eqv;
+      last_safe_rsu_kp_[3] = rsu_msg->right_actuator_2.kp_eqv;
+
+      last_safe_rsu_kd_[0] = rsu_msg->left_actuator_1.kd_eqv;
+      last_safe_rsu_kd_[1] = rsu_msg->left_actuator_2.kd_eqv;
+      last_safe_rsu_kd_[2] = rsu_msg->right_actuator_1.kd_eqv;
+      last_safe_rsu_kd_[3] = rsu_msg->right_actuator_2.kd_eqv;
     } else {
       RCLCPP_WARN_THROTTLE(
         get_logger(), *get_clock(), 2000,
@@ -959,10 +998,20 @@ void RoaControllerNode::ControlLoop()
   }
 
   // stale / infeasible이면 hold
-  cmd.left_rsu_upper  = last_safe_rsu_[0];
-  cmd.left_rsu_lower  = last_safe_rsu_[1];
-  cmd.right_rsu_upper = last_safe_rsu_[2];
-  cmd.right_rsu_lower = last_safe_rsu_[3];
+  cmd.left_rsu_upper  = last_safe_rsu_q_[0];
+  cmd.left_rsu_lower  = last_safe_rsu_q_[1];
+  cmd.right_rsu_upper = last_safe_rsu_q_[2];
+  cmd.right_rsu_lower = last_safe_rsu_q_[3];
+
+  cmd.left_rsu_upper_kp  = last_safe_rsu_kp_[0];
+  cmd.left_rsu_lower_kp  = last_safe_rsu_kp_[1];
+  cmd.right_rsu_upper_kp = last_safe_rsu_kp_[2];
+  cmd.right_rsu_lower_kp = last_safe_rsu_kp_[3];
+
+  cmd.left_rsu_upper_kd  = last_safe_rsu_kd_[0];
+  cmd.left_rsu_lower_kd  = last_safe_rsu_kd_[1];
+  cmd.right_rsu_upper_kd = last_safe_rsu_kd_[2];
+  cmd.right_rsu_lower_kd = last_safe_rsu_kd_[3];
 
   printControlDebug(cmd, rsu_ok);
 
@@ -980,18 +1029,29 @@ void RoaControllerNode::ControlLoop()
     //   get_logger(), *get_clock(), 500,
     //   "[WalkBlend] actuator-space alpha=%.3f", alpha);
 
-    auto msg = roa_packet_manager::PacketManager::build(
-      cmd,
-      this->now(),
-      "/CTRL/RT_CONTROL");
-
-    motor_packit_pub_->publish(msg);
+    try {
+      auto msg = roa_packet_manager::PacketManager::build(
+        cmd,
+        this->now(),
+        "/CTRL/RT_CONTROL");
+      motor_packit_pub_->publish(msg);
+    }
+    catch (const std::exception& e) {
+      RCLCPP_ERROR(get_logger(), "Failed to build motor command message: %s", e.what());
+      return;
+    }
   }
   else {
     const auto init_cmd = roa::common::make_init_pose();
 
-    auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/DEBUG_MODE");
-    motor_packit_pub_->publish(msg);
+    try {
+      auto msg = roa_packet_manager::PacketManager::build(init_cmd, this->now(), "/CTRL/DEBUG_MODE");
+      motor_packit_pub_->publish(msg);
+    }
+    catch (const std::exception& e) {
+      RCLCPP_ERROR(get_logger(), "Failed to build init motor command message: %s", e.what());
+      return;
+    }
   }
 }
 

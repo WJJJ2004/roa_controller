@@ -107,7 +107,7 @@ The RSU system enables accurate ankle control despite complex mechanical linkage
 | `/hardware_interface/command` | MotorCommandArray | Actuator command output |
 | `/hardware_interface/state` | MotorStateArray | Motor feedback input |
 | `/rsu/state` | RsuStateArray | Estimated RSU joint state |
-| `/rsu/solution` | RsuSolution | IK solver output |
+| `/rsu/imp_solution` | RsuSolution | IK solver output |
 | `/rsu/target` | RsuTarget | Desired RSU command |
 | `/controller/status` | SystemStatus | Controller health and state |
 | `/imu/data` | sensor_msgs/Imu | IMU measurements |

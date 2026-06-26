@@ -10,7 +10,8 @@
 #include <lifecycle_msgs/msg/state.hpp>
 
 #include <roa_interfaces/msg/rsu_target.hpp>
-#include <roa_interfaces/msg/rsu_solution.hpp>
+// #include <roa_interfaces/msg/rsu_solution.hpp>
+#include <roa_interfaces/msg/rsu_imp_sol.hpp>
 #include <roa_interfaces/msg/system_status.hpp>
 #include "roa_interfaces/msg/motor_command.hpp"
 #include "roa_interfaces/msg/motor_command_array.hpp"
@@ -82,7 +83,8 @@ private:
   void onCmd(geometry_msgs::msg::Twist::SharedPtr msg);
   void onImu(sensor_msgs::msg::Imu::SharedPtr msg);
   void onGravity(geometry_msgs::msg::Vector3Stamped::SharedPtr msg);
-  void onRsuSolution(roa_interfaces::msg::RsuSolution::SharedPtr msg);
+  // void onRsuSolution(roa_interfaces::msg::RsuSolution::SharedPtr msg);
+  void onRsuSolution(roa_interfaces::msg::RsuImpSol::SharedPtr msg);
   void onMotorStatus(roa_interfaces::msg::MotorStateArray::SharedPtr msg);
   void onRsuStatus(roa_interfaces::msg::RsuStateArray::SharedPtr msg);
 
@@ -235,7 +237,8 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_sub_;
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
   rclcpp::Subscription<geometry_msgs::msg::Vector3Stamped>::SharedPtr gravity_sub_;
-  rclcpp::Subscription<roa_interfaces::msg::RsuSolution>::SharedPtr rsu_solution_sub_;
+  // rclcpp::Subscription<roa_interfaces::msg::RsuSolution>::SharedPtr rsu_solution_sub_;
+  rclcpp::Subscription<roa_interfaces::msg::RsuImpSol>::SharedPtr rsu_solution_sub_;
   rclcpp::Subscription<roa_interfaces::msg::MotorStateArray>::SharedPtr motor_state_sub_;
   rclcpp::Subscription<roa_interfaces::msg::RsuStateArray>::SharedPtr rsu_state_sub_;
 
@@ -261,7 +264,8 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   Latch<geometry_msgs::msg::Vector3Stamped> gravity_latch_;
   Latch<roa_interfaces::msg::MotorStateArray> motor_state_latch_;
   Latch<geometry_msgs::msg::Twist> cmd_latch_;
-  Latch<roa_interfaces::msg::RsuSolution> rsu_latch_;
+  // Latch<roa_interfaces::msg::RsuSolution> rsu_latch_;
+  Latch<roa_interfaces::msg::RsuImpSol> rsu_latch_;
   Latch<roa_interfaces::msg::RsuStateArray> rsu_state_latch_;
 
   // std::array<float, 3> cmd_latch_{0.0f, 0.0f, 0.0f};
@@ -298,7 +302,10 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
     return rsu;
   }
 
-  std::array<float, 4> last_safe_rsu_{0.f, 0.f, 0.f, 0.f};
+  std::array<float, 4> last_safe_rsu_q_{0.f, 0.f, 0.f, 0.f};
+  std::array<float, 4> last_safe_rsu_kp_{9.0f, 9.0f, 9.0f, 9.0f};
+  std::array<float, 4> last_safe_rsu_kd_{2.5f, 2.5f, 2.5f, 2.5f};
+  std::array<float, 3> last_command_buffer_{0.f, 0.f, 0.f};
 
   // ++++++++++++++++++++++++++++++++++++++++
   // last hw command latch
@@ -324,7 +331,7 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   std::string topic_walk_cmd_{"/walk_policy/cmd_vel"};
   std::string topic_imu_data_{"/imu/data"};
   std::string topic_imu_gravity_{"/imu/gravity"};
-  std::string topic_rsu_solution_{"/rsu/solution"};
+  std::string topic_rsu_solution_{"/rsu/imp_solution"};
   std::string topic_rsu_target_{"/rsu/target"};
   std::string topic_motor_command_{"/hardware_interface/command"};
   std::string topic_motor_state_{"/hardware_interface/state"};

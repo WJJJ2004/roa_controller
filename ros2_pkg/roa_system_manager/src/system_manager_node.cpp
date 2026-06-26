@@ -348,8 +348,12 @@ void SystemManagerNode::publishInitPosIfNeeded(const rclcpp::Time& now_time)
 
 void SystemManagerNode::publish_init_pos()
 {
-  auto msg = roa_packet_manager::PacketManager::build(init_pos_, this->now(), "INIT POS HOLD");
-  init_pos_pub_->publish(msg);
+  try {
+    auto msg = roa_packet_manager::PacketManager::build(init_pos_, this->now(), "INIT POS HOLD");
+    init_pos_pub_->publish(msg);
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(get_logger(), "Failed to build init position message: %s", e.what());
+  }
 }
 
 void SystemManagerNode::handleBoot(const rclcpp::Time& tnow)
