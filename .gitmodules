@@ -1,0 +1,6 @@
+[submodule "ros2_pkg/robstride_hardware_interface"]
+	path = ros2_pkg/robstride_hardware_interface
+	url = https://github.com/WJJJ2004/robstride_hardware_interface.git
+[submodule "ros2_pkg/imu_pkg"]
+	path = ros2_pkg/imu_pkg
+	url = https://github.com/WJJJ2004/imu_pkg.git
