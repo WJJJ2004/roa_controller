@@ -3,7 +3,7 @@
   <name>roa_packet_manager</name>
   <version>0.0.1</version>
   <description>Packet builder and decoder utilities for ROA motor interfaces.</description>
-  <maintainer email="your_email@example.com">Lee Won Jun</maintainer>
+  <maintainer email="dldnjswns7412@gmail.com">Lee Won Jun</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
