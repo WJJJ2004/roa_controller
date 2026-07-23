@@ -302,7 +302,7 @@ class SymmetricSampleGeneratorNode(Node):
                 yaml_path = os.path.join(share_dir, "config", "motor_setting.yaml")
             except Exception:
                 yaml_path = os.path.expanduser(
-                    "~/colcon_ws/src/robstride_hardware_interface/config/motor_setting.yaml"
+                    "~/colcon_ws/src/roa_controller/ros2_pkg/robstride_hardware_interface/config/motor_setting.yaml"
                 )
 
         with open(yaml_path, "r") as f:

@@ -139,7 +139,18 @@ class InitPoseTuningNode(Node):
         self.left_pitch = -ANKLE_INIT_POS
         self.right_pitch = ANKLE_INIT_POS
 
+        default_kp = 20.0
+        default_kd = 0.99
+        
         self.kp_map = {
+            0: default_kp,
+            1: default_kp,
+            2: default_kp,
+            3: default_kp,
+            4: default_kp,
+            5: default_kp,
+            6: default_kp,
+            7: default_kp,
             9: 50.0,
             10: 150.0,
             12: 200.0,
@@ -152,6 +163,14 @@ class InitPoseTuningNode(Node):
         }
 
         self.kd_map = {
+            0: default_kd,
+            1: default_kd,
+            2: default_kd,
+            3: default_kd,
+            4: default_kd,
+            5: default_kd,
+            6: default_kd,
+            7: default_kd,
             9: 2.0,
             10: 24.722,
             12: 26.387,
@@ -185,7 +204,7 @@ class InitPoseTuningNode(Node):
                 yaml_path = os.path.join(share_dir, "config", "motor_setting.yaml")
             except Exception:
                 yaml_path = os.path.expanduser(
-                    "~/colcon_ws/src/robstride_hardware_interface/config/motor_setting.yaml"
+                    "~/colcon_ws/src/roa_controller/ros2_pkg/robstride_hardware_interface/config/motor_setting.yaml"
                 )
 
         with open(yaml_path, "r") as f:
