@@ -36,7 +36,7 @@ setup(
             'hw_controll_test_node = rsu_manager.node.hw_controll_test_node:main',
             'rsu_link_plotter_node = rsu_manager.node.rsu_link_plotter_node:main',
             'init_pose_tuning_node = rsu_manager.node.init_pose_tuning_node:main',
-            'symmetric_sample_generator_node = rsu_manager.node.symmetric_sample_generator_node:main',
+            'pace_symmetric_sample_generator_node = rsu_manager.node.pace_symmetric_sample_generator_node:main',
             'rt_imp_solver_node = rsu_manager.node.rt_imp_solver_node:main',
             'imp_hw_controll_test_node = rsu_manager.node.imp_hw_controll_test_node:main',
         ],

@@ -21,8 +21,8 @@ def generate_launch_description():
         ),
         Node(
                 package="rsu_manager",
-                executable="symmetric_sample_generator_node",
-                name="symmetric_sample_generator_node",
+                executable="pace_symmetric_sample_generator_node",
+                name="pace_symmetric_sample_generator_node",
                 output="screen",
                 arguments=["--ros-args", "--log-level", "warn"],
         ),

@@ -18,6 +18,7 @@ from roa_interfaces.msg import (
 )
 
 from rsu_manager.util.gamepad_reader import Gamepad
+from rsu_manager.util.hip_roll_pitch_mapper import map_hip_roll_pitch_to_motor_angles
 
 
 def clamp(x, lo, hi):
@@ -297,14 +298,27 @@ class InitPoseTuningNode(Node):
         self.right_pitch = ANKLE_INIT_POS - self.ankle_offset
 
     def get_non_rsu_position(self, motor_id: int):
+        # todo add left mirror option
+        left_hip_theta = map_hip_roll_pitch_to_motor_angles(
+            pitch=-HIP_INIT_POS + self.hip_offset,
+            roll=0.0,
+            is_left=True
+        )
+
+        right_hip_theta = map_hip_roll_pitch_to_motor_angles(
+            pitch=HIP_INIT_POS - self.hip_offset,
+            roll=0.0,
+            is_left=False
+        )
+
         if motor_id == 9:
             return 0.0
 
         # left leg
         if motor_id == 10:
-            return -HIP_INIT_POS + self.hip_offset
+            return left_hip_theta.theta1
         if motor_id == 12:
-            return 0.0
+            return left_hip_theta.theta2
         if motor_id == 14:
             return 0.0
         if motor_id == 16:
@@ -312,9 +326,9 @@ class InitPoseTuningNode(Node):
 
         # right leg
         if motor_id == 11:
-            return HIP_INIT_POS - self.hip_offset
+            return right_hip_theta.theta1
         if motor_id == 13:
-            return 0.0
+            return right_hip_theta.theta2
         if motor_id == 15:
             return 0.0
         if motor_id == 17:

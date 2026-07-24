@@ -1,0 +1,33 @@
+pace_symmetric_sample_generator:
+  ros__parameters:
+    rate_hz: 100.0
+
+    frequency_levels_hz:
+      - 0.1
+      - 0.2
+      - 0.5
+      - 1.0
+
+    cycles_per_frequency: 2.0
+
+    hip_pitch_amplitude_deg: 3.0
+    hip_roll_amplitude_deg: 3.0
+    hip_yaw_amplitude_deg: 5.0
+    knee_amplitude_deg: 5.0
+    ankle_pitch_amplitude_deg: 3.0
+    ankle_roll_amplitude_deg: 3.0
+
+    initial_hold_sec: 5.0
+    settle_before_sec: 1.0
+    settle_after_sec: 1.0
+
+    hip_init_pos_rad: 0.34906585
+    knee_init_pos_rad: 0.87266463
+
+    upper_body_hold_position_rad: 0.0
+    upper_body_kp: 40.0
+    upper_body_kd: 1.0
+
+    motor_state_timeout_sec: 0.1
+    rsu_solution_timeout_sec: 0.1
+    abort_on_rsu_infeasible: true

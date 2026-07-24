@@ -587,3 +587,6 @@ MigrationBackup/
 .vscode/
 *.vc.db
 
+# CSV files
+*.csv
+
