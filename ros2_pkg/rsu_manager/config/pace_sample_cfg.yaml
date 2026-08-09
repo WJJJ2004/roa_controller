@@ -1,33 +1,88 @@
-pace_symmetric_sample_generator:
+pace_symmetric_sample_generator_node:
   ros__parameters:
+    # Node loop frequency. Higher values publish commands more frequently.
     rate_hz: 100.0
 
-    frequency_levels_hz:
-      - 0.1
-      - 0.2
-      - 0.5
-      - 1.0
+    # Hold zero offset after startup before the first chirp begins.
+    initial_hold_sec: 10.0
 
-    cycles_per_frequency: 2.0
+    # Hold the center position after each joint pair returns to zero.
+    center_hold_sec: 1.0
 
-    hip_pitch_amplitude_deg: 3.0
-    hip_roll_amplitude_deg: 3.0
-    hip_yaw_amplitude_deg: 5.0
-    knee_amplitude_deg: 5.0
-    ankle_pitch_amplitude_deg: 3.0
-    ankle_roll_amplitude_deg: 3.0
+    # Duration of one continuous chirp sweep for each joint pair.
+    chirp_duration_sec: 20.0
 
-    initial_hold_sec: 5.0
-    settle_before_sec: 1.0
-    settle_after_sec: 1.0
+    # Starting frequency shared by every chirp.
+    min_frequency_hz: 0.1
 
-    hip_init_pos_rad: 0.34906585
-    knee_init_pos_rad: 0.87266463
+    # Maximum speed used when returning from the final chirp position to center.
+    return_speed_rad_s: 1.0
 
-    upper_body_hold_position_rad: 0.0
+    # Offset is treated as centered when its absolute value is below this value.
+    position_tolerance_rad: 0.00001
+
+    # Warn when measured command-target velocity exceeds pair limit by this ratio.
+    physical_velocity_warn_scale: 1.10
+
+    # Per-pair amplitude, requested maximum frequency, and modeled-joint speed limit.
+    # The actual maximum frequency may be reduced automatically by the speed limit.
+    hip_pitch:
+      amp_deg: 10.0
+      max_frequency_hz: 5.0
+      max_velocity_rad_s: 5.0
+
+    hip_roll:
+      amp_deg: 5.0
+      max_frequency_hz: 5.0
+      max_velocity_rad_s: 5.0
+
+    hip_yaw:
+      amp_deg: 10.0
+      max_frequency_hz: 5.0
+      max_velocity_rad_s: 5.0
+
+    knee_pitch:
+      amp_deg: 30.0
+      max_frequency_hz: 5.0
+      max_velocity_rad_s: 5.0
+
+    ankle_pitch:
+      amp_deg: 10.0
+      max_frequency_hz: 5.0
+      max_velocity_rad_s: 5.0
+
+    ankle_roll:
+      amp_deg: 10.0
+      max_frequency_hz: 5.0
+      max_velocity_rad_s: 5.0
+
+    # Maximum accepted age of hardware feedback and RSU solver output.
+    motor_state_timeout_sec: 0.2
+    rsu_solution_timeout_sec: 0.2
+
+    # Enter FAULT immediately when the RSU solver reports an infeasible solution.
+    abort_on_rsu_infeasible: true
+
+    # Empty means the node searches the installed hardware-interface package,
+    # then falls back to the source-workspace path.
+    motor_yaml_path: ""
+
+    # Upper-body motors are held at zero with these gains.
     upper_body_kp: 40.0
     upper_body_kd: 1.0
 
-    motor_state_timeout_sec: 0.1
-    rsu_solution_timeout_sec: 0.1
-    abort_on_rsu_infeasible: true
+    # Fallback gains for configured non-RSU motor IDs not listed below.
+    default_motor_kp: 20.0
+    default_motor_kd: 0.99
+
+    # Non-RSU motor PD gains. Changing a value affects the final command directly.
+    motor_gains:
+      "9":  {kp: 50.0,  kd: 2.0}
+      "10": {kp: 150.0, kd: 24.722}
+      "11": {kp: 150.0, kd: 24.722}
+      "12": {kp: 200.0, kd: 26.387}
+      "13": {kp: 200.0, kd: 26.387}
+      "14": {kp: 100.0, kd: 3.419}
+      "15": {kp: 100.0, kd: 3.419}
+      "16": {kp: 150.0, kd: 8.654}
+      "17": {kp: 150.0, kd: 8.654}

@@ -1,0 +1,75 @@
+# rsu_rt.yaml with RT initial pos seed for HW test (non-neutral pose)
+# NOTE:
+# PLEASE CHECK YOUR LAUNCH FILE TO MAKE SURE YOU ARE LOADING THE CORRECT CONFIG (E.G. rsu_hw_test.yaml for HW test with neutral initial seed, rsu_rt.yaml for RT test with non-neutral initial seed), OTHERWISE YOU MIGHT BE STARTING THE SOLVER WITH AN UNINTENDED INITIAL SEED WHICH CAN CAUSE UNEXPECTED BEHAVIOR (E.G. INSTANT LARGE ACTUATOR COMMANDS)
+
+rt_imp_solver_node:
+  ros__parameters:
+    # ==== RT initial pos seed ====
+    left_q_seed: [0.0, 0.0]
+    right_q_seed: [0.0, 0.0]
+
+    left_alpha_seed: [0.0, 0.0]
+    right_alpha_seed: [0.0, 0.0]
+
+    # ===== Actuator ID Mapping (ID to RSU solver) =====
+    left_ac1_id: 18
+    left_ac2_id: 20
+    right_ac1_id: 19
+    right_ac2_id: 21
+
+    # ===== joints =====
+    joint_ankle_pitch: "ankle_pitch"
+    joint_ankle_roll: "ankle_roll"
+    joint_upper_crank: "upper_crank"
+    joint_lower_crank: "lower_crank"
+
+    hold_alpha_on_infeasible: true
+
+    # ===== TF-based crank sanity check params =====
+    world_frame: "base_link"
+    tf_timeout_sec: 0.05
+    tf_check_rate_hz: 30.0
+    gate_publish_by_tf_check: true
+
+    # frames
+    c1_frame: "point_c1_1"
+    c2_frame: "point_c2_1"
+    u1_frame: "point_u1_1"
+    u2_frame: "point_u2_1"
+
+    # tolerances / limits
+    len_tol_m: 0.002
+    ang_min_deg: 65.0
+    ang_max_deg: 115.0
+
+    rsu_state_frame_id: "rsu_state"
+
+    # ---- 
+    target_lpf_enable: False
+    target_lpf_cutoff_hz: 2.0
+
+    virtual_pitch_kp: 25.0
+    virtual_pitch_kd: 1.2
+    virtual_roll_scale: 1.37
+    
+    actuator_kp_min: [5.0, 5.0]
+    actuator_kp_max: [25.0, 25.0]
+    actuator_kd_min: [0.2, 0.2]
+    actuator_kd_max: [6.0, 6.0]
+
+    default_kp: [9.0, 9.0]
+    default_kd: [2.25, 2.25]
+
+    imp_cond_warn: 10.0
+    imp_cond_fail: 50.0
+    imp_sigma_min_thresh: 1e-4
+
+    fit_error_warn: 0.20
+    fit_error_fail: 0.50
+
+    gain_lpf_cutoff_hz: 0.0
+    kp_slew_rate: 0.0
+    kd_slew_rate: 0.0
+
+    imp_dt_min: 1e-5
+    imp_dt_max: 0.2

@@ -114,130 +114,7 @@ class SymmetricChirpSampleGeneratorNode(Node):
     def __init__(self) -> None:
         super().__init__("pace_symmetric_sample_generator_node")
 
-        self.rate_hz = float(self.declare_parameter("rate_hz", 100.0).value)
-        self.initial_hold_sec = float(
-            self.declare_parameter("initial_hold_sec", 5.0).value
-        )
-        self.center_hold_sec = float(
-            self.declare_parameter("center_hold_sec", 1.0).value
-        )
-        self.chirp_duration_sec = float(
-            self.declare_parameter("chirp_duration_sec", 20.0).value
-        )
-        self.min_frequency_hz = float(
-            self.declare_parameter("min_frequency_hz", 0.1).value
-        )
-        self.physical_velocity_warn_scale = float(
-            self.declare_parameter("physical_velocity_warn_scale", 1.10).value
-        )
-        self.return_speed_rad_s = float(
-            self.declare_parameter("return_speed_rad_s", 1.0).value
-        )
-        self.position_tolerance_rad = float(
-            self.declare_parameter("position_tolerance_rad", 1.0e-5).value
-        )
-
-        # Pair별 trajectory 범위 / 최대 주파수 / 최대 modeled-joint 속도.
-        # RViz offline 검증 후 실기에서 조정할 수 있도록 모두 독립 파라미터화한다.
-        self.pair_cfg = {
-            "hip_pitch": {
-                "amp_rad": math.radians(float(
-                    self.declare_parameter("hip_pitch.amp_deg", 5.0).value
-                )),
-                "max_frequency_hz": float(
-                    self.declare_parameter("hip_pitch.max_frequency_hz", 5.0).value
-                ),
-                "max_velocity_rad_s": float(
-                    self.declare_parameter("hip_pitch.max_velocity_rad_s", 2.0).value
-                ),
-            },
-            "hip_roll": {
-                "amp_rad": math.radians(float(
-                    self.declare_parameter("hip_roll.amp_deg", 3.0).value
-                )),
-                "max_frequency_hz": float(
-                    self.declare_parameter("hip_roll.max_frequency_hz", 5.0).value
-                ),
-                "max_velocity_rad_s": float(
-                    self.declare_parameter("hip_roll.max_velocity_rad_s", 1.5).value
-                ),
-            },
-            "hip_yaw": {
-                "amp_rad": math.radians(float(
-                    self.declare_parameter("hip_yaw.amp_deg", 5.0).value
-                )),
-                "max_frequency_hz": float(
-                    self.declare_parameter("hip_yaw.max_frequency_hz", 5.0).value
-                ),
-                "max_velocity_rad_s": float(
-                    self.declare_parameter("hip_yaw.max_velocity_rad_s", 2.0).value
-                ),
-            },
-            "knee_pitch": {
-                "amp_rad": math.radians(float(
-                    self.declare_parameter("knee_pitch.amp_deg", 10.0).value
-                )),
-                "max_frequency_hz": float(
-                    self.declare_parameter("knee_pitch.max_frequency_hz", 3.0).value
-                ),
-                "max_velocity_rad_s": float(
-                    self.declare_parameter("knee_pitch.max_velocity_rad_s", 3.0).value
-                ),
-            },
-            "ankle_pitch": {
-                "amp_rad": math.radians(float(
-                    self.declare_parameter("ankle_pitch.amp_deg", 8.0).value
-                )),
-                "max_frequency_hz": float(
-                    self.declare_parameter("ankle_pitch.max_frequency_hz", 3.0).value
-                ),
-                "max_velocity_rad_s": float(
-                    self.declare_parameter("ankle_pitch.max_velocity_rad_s", 3.0).value
-                ),
-            },
-            "ankle_roll": {
-                "amp_rad": math.radians(float(
-                    self.declare_parameter("ankle_roll.amp_deg", 5.0).value
-                )),
-                "max_frequency_hz": float(
-                    self.declare_parameter("ankle_roll.max_frequency_hz", 4.0).value
-                ),
-                "max_velocity_rad_s": float(
-                    self.declare_parameter("ankle_roll.max_velocity_rad_s", 2.0).value
-                ),
-            },
-        }
-        # self.hip_init_pos_rad = float(
-        #     self.declare_parameter(
-        #         "hip_init_pos_rad", math.radians(0.0)
-        #     ).value
-        # )
-
-        self.motor_state_timeout_sec = float(
-            self.declare_parameter("motor_state_timeout_sec", 0.2).value
-        )
-        self.rsu_solution_timeout_sec = float(
-            self.declare_parameter("rsu_solution_timeout_sec", 0.2).value
-        )
-        self.abort_on_rsu_infeasible = bool(
-            self.declare_parameter("abort_on_rsu_infeasible", True).value
-        )
-        self.motor_yaml_path = str(
-            self.declare_parameter("motor_yaml_path", "").value
-        )
-
-        self.upper_body_kp = float(
-            self.declare_parameter("upper_body_kp", 40.0).value
-        )
-        self.upper_body_kd = float(
-            self.declare_parameter("upper_body_kd", 1.0).value
-        )
-        self.default_motor_kp = float(
-            self.declare_parameter("default_motor_kp", 20.0).value
-        )
-        self.default_motor_kd = float(
-            self.declare_parameter("default_motor_kd", 0.99).value
-        )
+        self.load_parameters()
 
         self.kp_map = {
             9: 50.0,
@@ -250,6 +127,7 @@ class SymmetricChirpSampleGeneratorNode(Node):
             16: 150.0,
             17: 150.0,
         }
+
         self.kd_map = {
             9: 2.0,
             10: 24.722,
@@ -261,7 +139,6 @@ class SymmetricChirpSampleGeneratorNode(Node):
             16: 8.654,
             17: 8.654,
         }
-
         self._validate_parameters()
 
         self.pub_rsu_target = self.create_publisher(
@@ -317,6 +194,236 @@ class SymmetricChirpSampleGeneratorNode(Node):
 
         self.timer = self.create_timer(1.0 / self.rate_hz, self.on_timer)
         self.print_test_plan()
+
+    def load_parameters(self) -> None:
+        # ────────────── 파라미터 선언 ──────────────
+        self.declare_parameter("rate_hz", 100.0)
+        self.declare_parameter("initial_hold_sec", 5.0)
+        self.declare_parameter("center_hold_sec", 1.0)
+        self.declare_parameter("chirp_duration_sec", 20.0)
+        self.declare_parameter("min_frequency_hz", 0.1)
+        self.declare_parameter("physical_velocity_warn_scale", 1.10)
+        self.declare_parameter("return_speed_rad_s", 1.0)
+        self.declare_parameter("position_tolerance_rad", 1.0e-5)
+
+        self.declare_parameter("hip_pitch.amp_deg", 5.0)
+        self.declare_parameter("hip_pitch.max_frequency_hz", 5.0)
+        self.declare_parameter("hip_pitch.max_velocity_rad_s", 2.0)
+
+        self.declare_parameter("hip_roll.amp_deg", 3.0)
+        self.declare_parameter("hip_roll.max_frequency_hz", 5.0)
+        self.declare_parameter("hip_roll.max_velocity_rad_s", 1.5)
+
+        self.declare_parameter("hip_yaw.amp_deg", 5.0)
+        self.declare_parameter("hip_yaw.max_frequency_hz", 5.0)
+        self.declare_parameter("hip_yaw.max_velocity_rad_s", 2.0)
+
+        self.declare_parameter("knee_pitch.amp_deg", 10.0)
+        self.declare_parameter("knee_pitch.max_frequency_hz", 3.0)
+        self.declare_parameter("knee_pitch.max_velocity_rad_s", 3.0)
+
+        self.declare_parameter("ankle_pitch.amp_deg", 8.0)
+        self.declare_parameter("ankle_pitch.max_frequency_hz", 3.0)
+        self.declare_parameter("ankle_pitch.max_velocity_rad_s", 3.0)
+
+        self.declare_parameter("ankle_roll.amp_deg", 5.0)
+        self.declare_parameter("ankle_roll.max_frequency_hz", 4.0)
+        self.declare_parameter("ankle_roll.max_velocity_rad_s", 2.0)
+
+        self.declare_parameter("motor_state_timeout_sec", 0.2)
+        self.declare_parameter("rsu_solution_timeout_sec", 0.2)
+        self.declare_parameter("abort_on_rsu_infeasible", True)
+        self.declare_parameter("motor_yaml_path", "")
+
+        self.declare_parameter("upper_body_kp", 40.0)
+        self.declare_parameter("upper_body_kd", 1.0)
+        self.declare_parameter("default_motor_kp", 20.0)
+        self.declare_parameter("default_motor_kd", 0.99)
+
+        # ────────────── 파라미터 로드 ──────────────
+        self.rate_hz = float(self.get_parameter("rate_hz").value)
+        self.initial_hold_sec = float(
+            self.get_parameter("initial_hold_sec").value
+        )
+        self.center_hold_sec = float(
+            self.get_parameter("center_hold_sec").value
+        )
+        self.chirp_duration_sec = float(
+            self.get_parameter("chirp_duration_sec").value
+        )
+        self.min_frequency_hz = float(
+            self.get_parameter("min_frequency_hz").value
+        )
+        self.physical_velocity_warn_scale = float(
+            self.get_parameter("physical_velocity_warn_scale").value
+        )
+        self.return_speed_rad_s = float(
+            self.get_parameter("return_speed_rad_s").value
+        )
+        self.position_tolerance_rad = float(
+            self.get_parameter("position_tolerance_rad").value
+        )
+
+        self.pair_cfg = {
+            "hip_pitch": {
+                "amp_rad": math.radians(float(
+                    self.get_parameter("hip_pitch.amp_deg").value
+                )),
+                "max_frequency_hz": float(
+                    self.get_parameter(
+                        "hip_pitch.max_frequency_hz"
+                    ).value
+                ),
+                "max_velocity_rad_s": float(
+                    self.get_parameter(
+                        "hip_pitch.max_velocity_rad_s"
+                    ).value
+                ),
+            },
+            "hip_roll": {
+                "amp_rad": math.radians(float(
+                    self.get_parameter("hip_roll.amp_deg").value
+                )),
+                "max_frequency_hz": float(
+                    self.get_parameter(
+                        "hip_roll.max_frequency_hz"
+                    ).value
+                ),
+                "max_velocity_rad_s": float(
+                    self.get_parameter(
+                        "hip_roll.max_velocity_rad_s"
+                    ).value
+                ),
+            },
+            "hip_yaw": {
+                "amp_rad": math.radians(float(
+                    self.get_parameter("hip_yaw.amp_deg").value
+                )),
+                "max_frequency_hz": float(
+                    self.get_parameter(
+                        "hip_yaw.max_frequency_hz"
+                    ).value
+                ),
+                "max_velocity_rad_s": float(
+                    self.get_parameter(
+                        "hip_yaw.max_velocity_rad_s"
+                    ).value
+                ),
+            },
+            "knee_pitch": {
+                "amp_rad": math.radians(float(
+                    self.get_parameter("knee_pitch.amp_deg").value
+                )),
+                "max_frequency_hz": float(
+                    self.get_parameter(
+                        "knee_pitch.max_frequency_hz"
+                    ).value
+                ),
+                "max_velocity_rad_s": float(
+                    self.get_parameter(
+                        "knee_pitch.max_velocity_rad_s"
+                    ).value
+                ),
+            },
+            "ankle_pitch": {
+                "amp_rad": math.radians(float(
+                    self.get_parameter("ankle_pitch.amp_deg").value
+                )),
+                "max_frequency_hz": float(
+                    self.get_parameter(
+                        "ankle_pitch.max_frequency_hz"
+                    ).value
+                ),
+                "max_velocity_rad_s": float(
+                    self.get_parameter(
+                        "ankle_pitch.max_velocity_rad_s"
+                    ).value
+                ),
+            },
+            "ankle_roll": {
+                "amp_rad": math.radians(float(
+                    self.get_parameter("ankle_roll.amp_deg").value
+                )),
+                "max_frequency_hz": float(
+                    self.get_parameter(
+                        "ankle_roll.max_frequency_hz"
+                    ).value
+                ),
+                "max_velocity_rad_s": float(
+                    self.get_parameter(
+                        "ankle_roll.max_velocity_rad_s"
+                    ).value
+                ),
+            },
+        }
+
+        self.motor_state_timeout_sec = float(
+            self.get_parameter("motor_state_timeout_sec").value
+        )
+        self.rsu_solution_timeout_sec = float(
+            self.get_parameter("rsu_solution_timeout_sec").value
+        )
+        self.abort_on_rsu_infeasible = bool(
+            self.get_parameter("abort_on_rsu_infeasible").value
+        )
+        self.motor_yaml_path = str(
+            self.get_parameter("motor_yaml_path").value
+        )
+
+        self.upper_body_kp = float(
+            self.get_parameter("upper_body_kp").value
+        )
+        self.upper_body_kd = float(
+            self.get_parameter("upper_body_kd").value
+        )
+        self.default_motor_kp = float(
+            self.get_parameter("default_motor_kp").value
+        )
+        self.default_motor_kd = float(
+            self.get_parameter("default_motor_kd").value
+        )
+
+        # ────────────── 로드 결과 출력 ──────────────
+        self.print_loaded_parameters()
+
+    def print_loaded_parameters(self) -> None:
+        self.get_logger().info(
+            "\n"
+            "========== SAMPLE GENERATOR PARAMETERS ==========\n"
+            f"rate_hz                     : {self.rate_hz:.3f}\n"
+            f"initial_hold_sec            : {self.initial_hold_sec:.3f}\n"
+            f"center_hold_sec             : {self.center_hold_sec:.3f}\n"
+            f"chirp_duration_sec          : {self.chirp_duration_sec:.3f}\n"
+            f"min_frequency_hz            : {self.min_frequency_hz:.3f}\n"
+            f"return_speed_rad_s          : {self.return_speed_rad_s:.3f}\n"
+            f"position_tolerance_rad      : "
+            f"{self.position_tolerance_rad:.8f}\n"
+            f"velocity_warn_scale         : "
+            f"{self.physical_velocity_warn_scale:.3f}\n"
+            "\n"
+            f"motor_state_timeout_sec     : "
+            f"{self.motor_state_timeout_sec:.3f}\n"
+            f"rsu_solution_timeout_sec    : "
+            f"{self.rsu_solution_timeout_sec:.3f}\n"
+            f"abort_on_rsu_infeasible     : "
+            f"{self.abort_on_rsu_infeasible}\n"
+            f"motor_yaml_path             : "
+            f"{self.motor_yaml_path or '[auto search]'}\n"
+            "\n"
+            f"upper_body_kp               : {self.upper_body_kp:.3f}\n"
+            f"upper_body_kd               : {self.upper_body_kd:.3f}\n"
+            f"default_motor_kp            : {self.default_motor_kp:.3f}\n"
+            f"default_motor_kd            : {self.default_motor_kd:.3f}\n"
+            "================================================="
+        )
+
+        for pair_name, cfg in self.pair_cfg.items():
+            self.get_logger().info(
+                f"[PAIR PARAM] {pair_name:<13} | "
+                f"amp={math.degrees(cfg['amp_rad']):.3f} deg | "
+                f"max_frequency={cfg['max_frequency_hz']:.3f} Hz | "
+                f"max_velocity={cfg['max_velocity_rad_s']:.3f} rad/s"
+            )
 
     def _validate_parameters(self) -> None:
         if self.rate_hz <= 0.0:
@@ -377,40 +484,40 @@ class SymmetricChirpSampleGeneratorNode(Node):
 
     def build_joint_pairs(self):
         return [
-            {
-                "name": "hip_pitch",
-                "type": "coupled_hip",
-                "axis": "pitch",
-                "left_sign": +1.0,
-                "right_sign": -1.0,
-                "amp": self.pair_cfg["hip_pitch"]["amp_rad"],
-                "max_frequency_hz": self.pair_cfg["hip_pitch"]["max_frequency_hz"],
-                "max_velocity_rad_s": self.pair_cfg["hip_pitch"]["max_velocity_rad_s"],
-                "directions": [+1.0, -1.0],
-            },
-            {
-                "name": "hip_roll",
-                "type": "coupled_hip",
-                "axis": "roll",
-                "left_sign": +1.0,
-                "right_sign": -1.0,
-                "amp": self.pair_cfg["hip_roll"]["amp_rad"],
-                "max_frequency_hz": self.pair_cfg["hip_roll"]["max_frequency_hz"],
-                "max_velocity_rad_s": self.pair_cfg["hip_roll"]["max_velocity_rad_s"],
-                "directions": [+1.0],
-            },
-            {
-                "name": "hip_yaw",
-                "type": "motor_pair",
-                "left_id": 14,
-                "right_id": 15,
-                "left_sign": +1.0,
-                "right_sign": -1.0,
-                "amp": self.pair_cfg["hip_yaw"]["amp_rad"],
-                "max_frequency_hz": self.pair_cfg["hip_yaw"]["max_frequency_hz"],
-                "max_velocity_rad_s": self.pair_cfg["hip_yaw"]["max_velocity_rad_s"],
-                "directions": [+1.0, -1.0],
-            },
+            # {
+            #     "name": "hip_pitch",
+            #     "type": "coupled_hip",
+            #     "axis": "pitch",
+            #     "left_sign": +1.0,
+            #     "right_sign": -1.0,
+            #     "amp": self.pair_cfg["hip_pitch"]["amp_rad"],
+            #     "max_frequency_hz": self.pair_cfg["hip_pitch"]["max_frequency_hz"],
+            #     "max_velocity_rad_s": self.pair_cfg["hip_pitch"]["max_velocity_rad_s"],
+            #     "directions": [+1.0, -1.0],
+            # },
+            # {
+            #     "name": "hip_roll",
+            #     "type": "coupled_hip",
+            #     "axis": "roll",
+            #     "left_sign": +1.0,
+            #     "right_sign": -1.0,
+            #     "amp": self.pair_cfg["hip_roll"]["amp_rad"],
+            #     "max_frequency_hz": self.pair_cfg["hip_roll"]["max_frequency_hz"],
+            #     "max_velocity_rad_s": self.pair_cfg["hip_roll"]["max_velocity_rad_s"],
+            #     "directions": [+1.0],
+            # },
+            # {
+            #     "name": "hip_yaw",
+            #     "type": "motor_pair",
+            #     "left_id": 14,
+            #     "right_id": 15,
+            #     "left_sign": +1.0,
+            #     "right_sign": -1.0,
+            #     "amp": self.pair_cfg["hip_yaw"]["amp_rad"],
+            #     "max_frequency_hz": self.pair_cfg["hip_yaw"]["max_frequency_hz"],
+            #     "max_velocity_rad_s": self.pair_cfg["hip_yaw"]["max_velocity_rad_s"],
+            #     "directions": [+1.0, -1.0],
+            # },
             {
                 "name": "knee_pitch",
                 "type": "motor_pair",

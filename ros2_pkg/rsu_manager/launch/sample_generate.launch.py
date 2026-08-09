@@ -6,16 +6,16 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     pkg = FindPackageShare("rsu_manager")
-    param_file = PathJoinSubstitution([pkg, "config", "rsu_hw_test.yaml"])
-
+    solver_param_file = PathJoinSubstitution([pkg, "config", "rsu_imp_sample.yaml"])
+    sample_param_file = PathJoinSubstitution([pkg, "config", "pace_sample_cfg.yaml"])
     return LaunchDescription([
         Node(
             package="rsu_manager",
-            executable="rt_solver_node",
-            name="rt_solver_node",
+            executable="rt_imp_solver_node",
+            name="rt_imp_solver_node",
             output="screen",
             parameters=[
-                param_file,
+                solver_param_file,
             ],
             arguments=["--ros-args", "--log-level", "info"],
         ),
@@ -24,6 +24,9 @@ def generate_launch_description():
                 executable="pace_symmetric_sample_generator_node",
                 name="pace_symmetric_sample_generator_node",
                 output="screen",
+                parameters=[
+                    sample_param_file,
+                ],
                 arguments=["--ros-args", "--log-level", "warn"],
         ),
     ])

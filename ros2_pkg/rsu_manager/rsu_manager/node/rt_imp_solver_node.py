@@ -854,6 +854,36 @@ class RSURtImpedanceSolverNode(Node):
             estimator_degraded=right_state.degraded,
         )
 
+        # self.get_logger().info(
+        #     "[RSU IMP DEBUG] "
+        #     f"dt={dt:.6f} | "
+        #     f"L("
+        #     f"state_valid={left_state.valid}, "
+        #     f"J={np.asarray(left_state.J_qx).round(5).tolist()}, "
+        #     f"imp_valid={left_imp.valid}, "
+        #     f"fallback={left_imp.fallback_used}, "
+        #     f"kp={np.asarray(left_imp.kp).round(4).tolist()}, "
+        #     f"kd={np.asarray(left_imp.kd).round(4).tolist()}, "
+        #     f"cond={left_imp.condJ:.3f}, "
+        #     f"Kerr={left_imp.stiffness_error:.3f}, "
+        #     f"Derr={left_imp.damping_error:.3f}, "
+        #     f"msg='{left_imp.debug_msg}'"
+        #     f") | "
+        #     f"R("
+        #     f"state_valid={right_state.valid}, "
+        #     f"J={np.asarray(right_state.J_qx).round(5).tolist()}, "
+        #     f"imp_valid={right_imp.valid}, "
+        #     f"fallback={right_imp.fallback_used}, "
+        #     f"kp={np.asarray(right_imp.kp).round(4).tolist()}, "
+        #     f"kd={np.asarray(right_imp.kd).round(4).tolist()}, "
+        #     f"cond={right_imp.condJ:.3f}, "
+        #     f"Kerr={right_imp.stiffness_error:.3f}, "
+        #     f"Derr={right_imp.damping_error:.3f}, "
+        #     f"msg='{right_imp.debug_msg}'"
+        #     f")",
+        #     throttle_duration_sec=0.5,
+        # )
+
         self.latest_left_imp = left_imp
         self.latest_right_imp = right_imp
 
