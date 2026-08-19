@@ -1,7 +1,7 @@
 pace_symmetric_sample_generator_node:
   ros__parameters:
     # Node loop frequency. Higher values publish commands more frequently.
-    rate_hz: 100.0
+    rate_hz: 300.0
 
     # Hold zero offset after startup before the first chirp begins.
     initial_hold_sec: 10.0
@@ -10,13 +10,13 @@ pace_symmetric_sample_generator_node:
     center_hold_sec: 1.0
 
     # Duration of one continuous chirp sweep for each joint pair.
-    chirp_duration_sec: 20.0
+    chirp_duration_sec: 40.0
 
     # Starting frequency shared by every chirp.
     min_frequency_hz: 0.1
 
     # Maximum speed used when returning from the final chirp position to center.
-    return_speed_rad_s: 1.0
+    return_speed_rad_s: 0.5
 
     # Offset is treated as centered when its absolute value is below this value.
     position_tolerance_rad: 0.00001
@@ -27,34 +27,34 @@ pace_symmetric_sample_generator_node:
     # Per-pair amplitude, requested maximum frequency, and modeled-joint speed limit.
     # The actual maximum frequency may be reduced automatically by the speed limit.
     hip_pitch:
-      amp_deg: 10.0
-      max_frequency_hz: 5.0
-      max_velocity_rad_s: 5.0
+      amp_deg: 20.0
+      max_frequency_hz: 10.0
+      max_velocity_rad_s: 10.0
 
     hip_roll:
-      amp_deg: 5.0
-      max_frequency_hz: 5.0
-      max_velocity_rad_s: 5.0
+      amp_deg: 10.0
+      max_frequency_hz: 10.0
+      max_velocity_rad_s: 10.0
 
     hip_yaw:
-      amp_deg: 10.0
-      max_frequency_hz: 5.0
-      max_velocity_rad_s: 5.0
+      amp_deg: 40.0
+      max_frequency_hz: 10.0
+      max_velocity_rad_s: 10.0
 
     knee_pitch:
       amp_deg: 30.0
-      max_frequency_hz: 5.0
-      max_velocity_rad_s: 5.0
+      max_frequency_hz: 10.0
+      max_velocity_rad_s: 10.0
 
     ankle_pitch:
       amp_deg: 10.0
-      max_frequency_hz: 5.0
-      max_velocity_rad_s: 5.0
+      max_frequency_hz: 10.0
+      max_velocity_rad_s: 10.0
 
     ankle_roll:
       amp_deg: 10.0
-      max_frequency_hz: 5.0
-      max_velocity_rad_s: 5.0
+      max_frequency_hz: 10.0
+      max_velocity_rad_s: 10.0
 
     # Maximum accepted age of hardware feedback and RSU solver output.
     motor_state_timeout_sec: 0.2
