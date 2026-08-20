@@ -87,7 +87,7 @@ struct Policy12DofV2 {
   }
 
   static inline std::string default_model_path() {
-    return std::string(ROA_POLICY_DRIVER_SHARE_DIR) + "/onnx/12dof_guv/policy.onnx";
+    return std::string(ROA_POLICY_DRIVER_SHARE_DIR) + "/onnx/12dof_guv_v2/policy.onnx";
   }
 
   static inline void pack_act(const Act& a, float* out10) noexcept {

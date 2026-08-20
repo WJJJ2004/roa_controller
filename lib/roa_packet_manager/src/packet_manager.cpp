@@ -8,19 +8,19 @@ namespace roa_packet_manager
 
 const std::array<PacketManager::JointMeta, PacketManager::kMotorCount>
 PacketManager::kJointMetaTable{{
-  {"torso_yaw",          9,  50.0f,  2.0f},
-  {"left_hip_pitch",    10, 180.0f, 24.0f},
-  {"right_hip_pitch",   11, 180.0f, 24.0f},
-  {"left_hip_roll",     12, 200.0f, 25.0f},
-  {"right_hip_roll",    13, 200.0f, 25.0f},
-  {"left_hip_yaw",      14, 100.0f,  3.0f},
-  {"right_hip_yaw",     15, 100.0f,  3.0f},
-  {"left_knee_pitch",   16, 180.0f,  8.0f},
-  {"right_knee_pitch",  17, 180.0f,  8.0f},
-  {"left_rsu_upper",    18,  40.0f,  0.99f},
-  {"right_rsu_upper",   19,  40.0f,  0.99f},
-  {"left_rsu_lower",    20,  40.0f,  0.99f},
-  {"right_rsu_lower",   21,  40.0f,  0.99f},
+  {"torso_yaw",          9,   50.0f,   2.0f},
+  {"left_hip_pitch",    10,  150.0f,  24.722f},
+  {"right_hip_pitch",   11,  150.0f,  24.722f},
+  {"left_hip_roll",     12,  200.0f,  26.387f},
+  {"right_hip_roll",    13,  200.0f,  26.387f},
+  {"left_hip_yaw",      14,  100.0f,   3.419f},
+  {"right_hip_yaw",     15,  100.0f,   3.419f},
+  {"left_knee_pitch",   16,  150.0f,   8.654f},
+  {"right_knee_pitch",  17,  150.0f,   8.654f},
+  {"left_rsu_upper",    18,  15.75f,  2.5f},
+  {"right_rsu_upper",   19,  15.75f,  2.5f},
+  {"left_rsu_lower",    20,  15.75f,  2.5f},
+  {"right_rsu_lower",   21,  15.75f,  2.5f},
 }};
 
 bool PacketManager::valid_motor_cmd(const Command12Dof& cmd)
@@ -31,8 +31,8 @@ bool PacketManager::valid_motor_cmd(const Command12Dof& cmd)
 
   const auto valid_gain = [](float kp, float kd) {
     return std::isfinite(kp) && std::isfinite(kd) &&
-           kp >= 0.0f && kd >= 0.0f &&
-           kp <= 1000.0f && kd <= 100.0f;
+           kp > 0.0f && kd > 0.0f &&
+           kp < 1000.0f && kd < 100.0f;
   };
 
   return

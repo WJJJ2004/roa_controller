@@ -30,23 +30,8 @@
 #include <rclcpp_lifecycle/lifecycle_node.hpp>
 #include <rclcpp_lifecycle/lifecycle_publisher.hpp>
 
-#include <roa_common/constants.hpp>
+#include <roa_common/fixed_joint_poses.hpp>
 #include <roa_common/pose.hpp>
-
-// // 서있는 자세를 위한 보행 초기 자세 -> 하드웨어 제어의 offset pose 
-// #define HIP_INIT_POS 0.418879f
-// #define KNEE_INIT_POS 0.698131f
-// #define ANKLE_INIT_POS 0.458105f
-
-// // 추론 모델 기준의 초기 자세 -> last action obs의 기준점 
-// #define HIP_INIT_INF 0.418879f  // 24.0 degrees
-// #define KNEE_INIT_INF 0.698132f // 40.0 degrees
-// #define ANKLE_INIT_INF 0.567232f // 32.5 degrees
-
-// // 추론 모델의 상대각도 기준점 -> default anlge
-// #define HIP_PITCH_DEF 0.349066f  // 20 degrees 
-// #define KNEE_PITCH_DEF 0.872665f // 50 degrees
-// #define ANKLE_PITCH_DEF 0.523599f // 30 degrees
 
 namespace roa_main_controller
 {
@@ -114,54 +99,9 @@ bool q_target_lpf_initialized_ = false;
 
 rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
 
-  // roa_packet_manager::PacketManager::Command12Dof
-  // setInitPose() 
-  // {  
-  //   roa_packet_manager::PacketManager::Command12Dof init_pos_{};
-
-  //   init_pos_.left_hip_pitch   = -HIP_INIT_POS;
-  //   init_pos_.left_hip_roll    = 0.0f;
-  //   init_pos_.left_hip_yaw     = 0.0f;
-  //   init_pos_.left_knee_pitch  =  KNEE_INIT_POS;
-
-  //   init_pos_.right_hip_pitch  =  HIP_INIT_POS;
-  //   init_pos_.right_hip_roll   = 0.0f;
-  //   init_pos_.right_hip_yaw    = 0.0f;
-  //   init_pos_.right_knee_pitch = -KNEE_INIT_POS;
-
-  //   init_pos_.left_rsu_upper   = -ANKLE_INIT_POS;
-  //   init_pos_.left_rsu_lower   =  ANKLE_INIT_POS;
-  //   init_pos_.right_rsu_upper  =  ANKLE_INIT_POS;
-  //   init_pos_.right_rsu_lower  = -ANKLE_INIT_POS;
-
-  //   return init_pos_;
-  // }
-
   rclcpp::Time walk_blend_start_time_;
   bool walk_blend_enabled_ = true;
   double walk_blend_duration_sec_ = 3.0;
-
-  static std::array<float, kActDim>
-  make_default_angles()
-  {
-    using P = roa::policy::iface::Policy12DofV2;
-    std::array<float, P::kActDim> q{};
-
-    q[P::L_HIP_PITCH]    = -roa::constants::HIP_PITCH_DEF;
-    q[P::R_HIP_PITCH]    =  roa::constants::HIP_PITCH_DEF;
-    q[P::L_HIP_ROLL]     =  0.00f;
-    q[P::R_HIP_ROLL]     =  0.00f;
-    q[P::L_HIP_YAW]      =  0.00f;
-    q[P::R_HIP_YAW]      =  0.00f;
-    q[P::L_KNEE_PITCH]   =  roa::constants::KNEE_PITCH_DEF;
-    q[P::R_KNEE_PITCH]   = -roa::constants::KNEE_PITCH_DEF;
-    q[P::L_ANKLE_PITCH]  = -roa::constants::ANKLE_PITCH_DEF;
-    q[P::R_ANKLE_PITCH]  =  roa::constants::ANKLE_PITCH_DEF;
-    q[P::L_ANKLE_ROLL]   =  0.00f;
-    q[P::R_ANKLE_ROLL]   =  0.00f;
-
-    return q;
-  }
 
   static std::array<float, kActDim>
   initLastAction()
@@ -173,48 +113,17 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
     q.fill(0.0f);
   
     
-    // q[P::L_HIP_PITCH]    = -roa::constants::HIP_INIT_INF;
-    // q[P::R_HIP_PITCH]    =  roa::constants::HIP_INIT_INF;
-    // q[P::L_HIP_ROLL]     =  0.00f;
-    // q[P::R_HIP_ROLL]     =  0.00f;
-    // q[P::L_HIP_YAW]      =  0.00f;
-    // q[P::R_HIP_YAW]      =  0.00f;
-    // q[P::L_KNEE_PITCH]   =  roa::constants::KNEE_INIT_INF;
-    // q[P::R_KNEE_PITCH]   = -roa::constants::KNEE_INIT_INF;
-    // q[P::L_ANKLE_PITCH]  = -roa::constants::ANKLE_INIT_INF;
-    // q[P::R_ANKLE_PITCH]  =  roa::constants::ANKLE_INIT_INF;
-    // q[P::L_ANKLE_ROLL]   =  0.00f;
-    // q[P::R_ANKLE_ROLL]   =  0.00f;
-
-    return q;
-  }
-
-  static std::array<float, kActDim>
-  makeVirtualInitPos()
-  {
-    using P = roa::policy::iface::Policy12DofV2;
-    std::array<float, P::kActDim> q{};
-    
-    q[P::L_HIP_PITCH]    = -roa::constants::HIP_INIT_INF;
-    q[P::R_HIP_PITCH]    =  roa::constants::HIP_INIT_INF;
-    q[P::L_HIP_ROLL]     =  0.00f;
-    q[P::R_HIP_ROLL]     =  0.00f;
-    q[P::L_HIP_YAW]      =  0.00f;
-    q[P::R_HIP_YAW]      =  0.00f;
-    q[P::L_KNEE_PITCH]   =  roa::constants::KNEE_INIT_INF;
-    q[P::R_KNEE_PITCH]   = -roa::constants::KNEE_INIT_INF;
-    q[P::L_ANKLE_PITCH]  = -roa::constants::ANKLE_INIT_INF;
-    q[P::R_ANKLE_PITCH]  =  roa::constants::ANKLE_INIT_INF;
-    q[P::L_ANKLE_ROLL]   =  0.00f;
-    q[P::R_ANKLE_ROLL]   =  0.00f;
-
     return q;
   }
 
   // NOTE: default angle은 상대각도(obs.q_rel)의 기준점이자, policy의 출력(act)이 매핑되는 절대각도 기준점임.
-  const std::array<float, kActDim> default_angles_ = make_default_angles();
+  const std::array<float, kActDim> default_angles_ =
+    roa::common::to_policy_joint_array<roa::policy::iface::Policy12DofV2>(
+      roa::common::fixed_pose::kPolicyDefaultVirtualPose);
   const float action_scale_ = 0.5;
-  const std::array<float, kActDim> virtual_init_pos_ = makeVirtualInitPos();
+  const std::array<float, kActDim> virtual_init_pos_ =
+    roa::common::to_policy_joint_array<roa::policy::iface::Policy12DofV2>(
+      roa::common::fixed_pose::kInferenceBlendStartVirtualPose);
 
   bool is_activate{false};
   bool is_realtime_control_mode_ = false;
@@ -292,12 +201,13 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   std::array<float, 4>
   initLastSafeRsu()
   {
+    const auto& pose = roa::common::fixed_pose::kHardwareBootActuatorPose;
     std::array<float, 4> rsu{};
 
-    rsu[0] = -roa::constants::ANKLE_INIT_POS; // left upper
-    rsu[1] =  roa::constants::ANKLE_INIT_POS; // left lower
-    rsu[2] =  roa::constants::ANKLE_INIT_POS; // right upper
-    rsu[3] = -roa::constants::ANKLE_INIT_POS; // right lower
+    rsu[0] = pose.left_rsu_upper;
+    rsu[1] = pose.left_rsu_lower;
+    rsu[2] = pose.right_rsu_upper;
+    rsu[3] = pose.right_rsu_lower;
 
     return rsu;
   }

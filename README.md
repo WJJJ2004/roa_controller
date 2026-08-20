@@ -166,7 +166,7 @@ Review at least the following files before running on hardware:
 | `ros2_pkg/imu_pkg/config/params.yaml` | Serial port, unit conversion, and 50 Hz publish rate |
 | `lib/roa_common/include/roa_common/constants.hpp` | Initial pose and policy reference joint angles |
 
-The main controller uses `Policy12DofV2` with `lib/roa_policy_driver/onnx/12dof_guv/policy.onnx`. The observation order, default joint angles, and action scale must remain consistent with the training environment.
+The main controller uses `Policy12DofV2` with `lib/roa_policy_driver/onnx/12dof_guv_v2/policy.onnx`. The observation order, default joint angles, and action scale must remain consistent with the training environment.
 
 ## Run
 

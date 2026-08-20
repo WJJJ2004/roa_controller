@@ -28,7 +28,7 @@ static bool read_f32_bin(const std::string& path, std::vector<float>& out) {
 int main(int argc, char** argv) {
   using Spec = roa::policy::iface::Policy12DofV2;
 
-  std::string obs_path = "onnx/12dof_guv/data/golden_obs.bin";
+  std::string obs_path = "onnx/12dof_guv_v2/data/golden_obs.bin";
   if (argc >= 2) obs_path = argv[1];
 
   std::vector<float> obs_packed;

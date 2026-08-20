@@ -16,7 +16,6 @@
 #include <roa_interfaces/msg/motor_command.hpp>
 #include <roa_interfaces/msg/motor_command_array.hpp>
 
-#include <roa_common/constants.hpp>
 #include <roa_common/pose.hpp>
 
 namespace system_manager

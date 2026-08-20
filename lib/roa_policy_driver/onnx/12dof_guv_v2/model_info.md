@@ -1,3 +1,6 @@
+# Observation Info
+
+```
 +---------------------------------------------------------+
 | Active Observation Terms in Group: 'policy' (shape: (45,)) |
 +-----------+---------------------------------+-----------+
@@ -10,4 +13,10 @@
 |     4     | imu_ang_vel                     |    (3,)   |
 |     5     | actions                         |   (12,)   |
 +-----------+---------------------------------+-----------+
+```
 
+# Model Summary
+
+* HW verison: 2nd Version of ROA Humanoid
+* Trainning session: Identified Actutor with DR
+* Task: Velocity Tracking
