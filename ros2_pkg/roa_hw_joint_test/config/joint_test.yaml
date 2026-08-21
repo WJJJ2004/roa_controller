@@ -1,0 +1,9 @@
+mirrored_joint_test_node:
+  ros__parameters:
+    # Fixed open-loop hip-pitch waveform. No feedback is used.
+    rate_hz: 100.0
+    initial_hold_sec: 10.0
+    amplitude_deg: 5.0
+    move_duration_sec: 5.0
+    hold_sec: 3.0
+    repeat: false
