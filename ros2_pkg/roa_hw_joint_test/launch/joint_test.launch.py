@@ -15,7 +15,7 @@ def generate_launch_description() -> LaunchDescription:
     visualize = LaunchConfiguration("visualize")
 
     return LaunchDescription([
-        DeclareLaunchArgument("amplitude_deg", default_value="5.0"),
+        DeclareLaunchArgument("amplitude_deg", default_value="30.0"),
         DeclareLaunchArgument("visualize", default_value="true"),
         Node(
             package="roa_hw_joint_test",
