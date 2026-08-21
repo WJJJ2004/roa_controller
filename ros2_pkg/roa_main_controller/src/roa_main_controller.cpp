@@ -955,10 +955,10 @@ void RoaControllerNode::ControlLoop()
     auto valid_gain = [](float kp, float kd) {
       return std::isfinite(kp) &&
             std::isfinite(kd) &&
-            kp >= 0.0f &&
-            kp <= 40.0f &&
-            kd >= 0.0f &&
-            kd <= 5.0f;
+            kp > 0.0f &&
+            kp < 40.0f &&
+            kd > 0.0f &&
+            kd < 5.0f;
     };
     const bool valid =
       std::isfinite(rsu_msg->left_actuator_1.q_target)  &&
@@ -991,7 +991,7 @@ void RoaControllerNode::ControlLoop()
         get_logger(), *get_clock(), 2000,
         "[ControlLoop] RSU solution contains NaN/Inf. Holding previous safe RSU command.");
     }
-  } else if (loop_count > 3) {  // 초기 제어 루프 2주기는 추론 없이 돌기에 RSU 솔루션이 없음
+  } else if (loop_count > 7) {  // 초기 제어 루프 6주기(C.F. 300 HZ 기준)는 추론 없이 돌기에 RSU 솔루션이 없음
     RCLCPP_WARN_THROTTLE(
       get_logger(), *get_clock(), 2000,
       "[ControlLoop] RSU solution stale or infeasible. Holding previous safe RSU command.");
