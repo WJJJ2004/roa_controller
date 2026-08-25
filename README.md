@@ -159,8 +159,8 @@ Review at least the following files before running on hardware:
 
 | File | Main Settings |
 | --- | --- |
-| `ros2_pkg/robstride_hardware_interface/config/motor_setting.yaml` | CAN interface names, motor IDs and types, 150 Hz control rate |
-| `ros2_pkg/roa_main_controller/config/params.yaml` | 100 Hz hardware command rate, 50 Hz policy rate, timeouts, and topics |
+| `ros2_pkg/robstride_hardware_interface/config/motor_setting.yaml` | CAN interface names, motor IDs and types, 300 Hz control rate |
+| `ros2_pkg/roa_main_controller/config/params.yaml` | 300 Hz hardware command rate, 50 Hz policy rate, timeouts, and topics |
 | `ros2_pkg/rsu_manager/config/rsu_imp_rt.yaml` | Non-neutral RSU seeds and impedance gains |
 | `ros2_pkg/rsu_manager/config/rsu_imp_sample.yaml` | Neutral seeds for sample collection |
 | `ros2_pkg/imu_pkg/config/params.yaml` | Serial port, unit conversion, and 50 Hz publish rate |
