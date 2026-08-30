@@ -1,0 +1,58 @@
+rsu_lut_state_node:
+  ros__parameters:
+    compute_rate_hz: 600.0
+    motor_state_topic: /hardware_interface/state
+    state_topic: /rsu/state
+    gain_snapshot_topic: /rsu_lut/gain_snapshot
+    frame_id: rsu_state
+    left_motor_ids: [18, 20]
+    right_motor_ids: [19, 21]
+    left_q_seed: [0.0, 0.0]
+    right_q_seed: [0.0, 0.0]
+    left_alpha_seed: [0.0, 0.0]
+    right_alpha_seed: [0.0, 0.0]
+    require_valid_impedance: false
+    lut_resolution_deg: 0.25
+    lut_roll_min_deg: -18.0
+    lut_roll_max_deg: 17.5
+    lut_pitch_min_deg: -36.0
+    lut_pitch_max_deg: 39.5
+    lut_branch_seed: [0.0, 0.0]
+    virtual_pitch_kp: 25.0
+    virtual_pitch_kd: 1.2
+    virtual_roll_scale: 1.37
+    actuator_kp_min: [5.0, 5.0]
+    actuator_kp_max: [25.0, 25.0]
+    actuator_kd_min: [0.2, 0.2]
+    actuator_kd_max: [6.0, 6.0]
+    default_kp: [9.0, 9.0]
+    default_kd: [2.25, 2.25]
+    imp_cond_warn: 10.0
+    imp_cond_fail: 50.0
+    imp_sigma_min_thresh: 0.0001
+    fit_error_warn: 0.20
+    fit_error_fail: 0.50
+    gain_lpf_cutoff_hz: 0.0
+    kp_slew_rate: 0.0
+    kd_slew_rate: 0.0
+    imp_dt_min: 0.00001
+    imp_dt_max: 0.2
+
+rsu_lut_solution_node:
+  ros__parameters:
+    compute_rate_hz: 600.0
+    target_topic: /rsu/target
+    solution_topic: /rsu/imp_solution
+    gain_snapshot_topic: /rsu_lut/gain_snapshot
+    frame_id: rsu_state
+    require_fresh_gain: true
+    gain_max_age_ms: 50.0
+    hold_target_on_infeasible: true
+    default_kp: [9.0, 9.0]
+    default_kd: [2.25, 2.25]
+    lut_resolution_deg: 0.25
+    lut_roll_min_deg: -18.0
+    lut_roll_max_deg: 17.5
+    lut_pitch_min_deg: -36.0
+    lut_pitch_max_deg: 39.5
+    lut_branch_seed: [0.0, 0.0]
