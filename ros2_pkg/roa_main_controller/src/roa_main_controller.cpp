@@ -21,6 +21,8 @@ ros2 bag record  \
 */
 #include "node/roa_main_controller.hpp"
 
+#include <roa_common/joint_limits.hpp>
+
 #include <algorithm>
 #include <chrono>
 #include <cmath>  // std::isfinite
@@ -824,12 +826,6 @@ void RoaControllerNode::InferenceLoop()
     return;
   }
 
-  last_policy_update_time_ = tnow;
-
-  for (int i = 0; i < kDof; ++i) {
-    last_action_[i] = act_buffer_[i];
-  }
-
   using P = roa::policy::iface::Policy12DofV2;
 
   // auto q_target = P::action_to_q_target(
@@ -846,6 +842,29 @@ void RoaControllerNode::InferenceLoop()
 
   auto q_target_raw = P::action_to_q_target(
     act_buffer_, default_angles_, action_scale_);
+
+  const auto clip_result =
+    roa::common::joint_limits::clip_policy_joint_target<P>(q_target_raw);
+
+  if (!clip_result.valid) {
+    RCLCPP_ERROR_THROTTLE(
+      get_logger(), *get_clock(), 2000,
+      "[InferenceLoop] Policy q_target contains NaN/Inf. Holding previous command.");
+    return;
+  }
+
+  if (clip_result.clipped_count > 0) {
+    RCLCPP_WARN_THROTTLE(
+      get_logger(), *get_clock(), 2000,
+      "[InferenceLoop] Clipped %zu virtual joint target(s) to training USD limits.",
+      clip_result.clipped_count);
+  }
+
+  last_policy_update_time_ = tnow;
+
+  for (int i = 0; i < kDof; ++i) {
+    last_action_[i] = act_buffer_[i];
+  }
 
   double lpf_dt_sec = 1.0 / std::max(1.0, policy_rate_hz_);
 
