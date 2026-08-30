@@ -17,7 +17,10 @@ ros2 bag record  \
   /rsu/imp_solution \
   /rsu/target \
   /controller/status \
-  /walk_initialized
+  /walk_initialized \
+  /imu/gravity
+
+
 */
 #include "node/roa_main_controller.hpp"
 
