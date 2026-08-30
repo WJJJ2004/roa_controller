@@ -1,0 +1,24 @@
+rsu_manager_v2:
+  ros__parameters:
+    lut_file: ""
+    target_poll_hz: 300.0
+    state_poll_hz: 600.0
+    command_rate_hz: 300.0
+    target_timeout_ms: 100.0
+    feedback_timeout_ms: 20.0
+    feedback_actuator_margin_deg: 2.0
+    left_motor_ids: [18, 20]
+    right_motor_ids: [19, 21]
+    initial_q: [0.0, -0.5672320]
+    initial_alpha: [-0.458105, 0.458105]
+    virtual_pitch_kp: 25.0
+    virtual_pitch_kd: 1.2
+    virtual_roll_scale: 1.37
+    actuator_kp_min: [5.0, 5.0]
+    actuator_kp_max: [25.0, 25.0]
+    actuator_kd_min: [0.2, 0.2]
+    # roa_main_controller requires kd < 5.0.
+    actuator_kd_max: [4.9, 4.9]
+    default_kp: [9.0, 9.0]
+    default_kd: [2.25, 2.25]
+    publish_state_every_control_tick: true
