@@ -37,8 +37,8 @@ constexpr VirtualJointPose12Dof make_policy_default_virtual_pose()
 }
 
 /*
-  * GRAVITY COMPENSATION TARGET POSE TABLE 
-
+ * GRAVITY COMPENSATION TARGET POSE TABLE 
+ 
   Joint                    q_des          q_target
   -------------------------------------------------
   left_hip_pitch       -0.4261674583   -0.4462451952
@@ -70,8 +70,8 @@ constexpr VirtualJointPose12Dof make_blend_start_virtual_pose()
   pose.left_hip_roll = -0.0502048484f;
   pose.right_hip_roll = 0.0502306974f;
 
-  pose.left_hip_yaw = -0.03f;
-  pose.right_hip_yaw = 0.03f;
+  pose.left_hip_yaw = -0.1383852648f;
+  pose.right_hip_yaw = 0.1383626377f;
 
   pose.left_knee_pitch = 0.7768609102f;
   pose.right_knee_pitch = -0.7768565353f;
@@ -99,8 +99,8 @@ constexpr ActuatorPose12Dof make_hardware_boot_actuator_pose()
   pose.left_hip_roll = -0.0502048484f;
   pose.right_hip_roll = 0.0502306974f;
 
-  pose.left_hip_yaw = -0.03f;
-  pose.right_hip_yaw = 0.03f;
+  pose.left_hip_yaw = -0.1383852648f;
+  pose.right_hip_yaw = 0.1383626377f;
 
   pose.left_knee_pitch = 0.7768609102f;
   pose.right_knee_pitch = -0.7768565353f;
