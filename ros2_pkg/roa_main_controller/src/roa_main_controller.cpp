@@ -900,8 +900,11 @@ void RoaControllerNode::InferenceLoop()
     virtual_init_pos_,
     q_target,
     alpha);
+  
+  if(control_mode_ == CONTROL_MODE::DEBUG) {
+    printInferenceDebug(q_blended);
+  }
 
-  printInferenceDebug(q_blended);
 
   {
     std::lock_guard<std::mutex> lk(cmd_m_);
@@ -1035,8 +1038,9 @@ void RoaControllerNode::ControlLoop()
   cmd.right_rsu_upper_kd = last_safe_rsu_kd_[2];
   cmd.right_rsu_lower_kd = last_safe_rsu_kd_[3];
 
-  printControlDebug(cmd, rsu_ok);
-
+  if (control_mode_ == CONTROL_MODE::DEBUG) {
+    printControlDebug(cmd, rsu_ok);
+  }
 
   if (control_mode_ == CONTROL_MODE::RT_CONTROL) {
     // const auto init_cmd = roa::common::make_init_pose();
