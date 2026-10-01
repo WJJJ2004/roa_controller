@@ -148,11 +148,11 @@ private:
   rclcpp::Time last_init_pos_pub_time_{0, 0, RCL_ROS_TIME};
 
   // parameters
-  double fsm_period_sec_{0.01};                // 100 Hz
+  double fsm_period_sec_{0.005};               // 200 Hz
   double controller_status_timeout_sec_{0.3};
   double safe_hold_timeout_sec_{2.0};
   double lifecycle_service_timeout_sec_{1.0};
-  double init_pos_pub_period_sec_{0.01};       // 100 Hz
+  double init_pos_pub_period_sec_{0.005};      // 200 Hz
   double init_pos_timeout_sec_{10.0};
   double error_log_throttle_sec_{2.0};
 

@@ -151,9 +151,9 @@ public:
     if (lut_file.empty()) {lut_file = default_lut;}
     lut_.load(lut_file);
 
-    target_poll_hz_ = declare_parameter<double>("target_poll_hz", 300.0);
-    state_poll_hz_ = declare_parameter<double>("state_poll_hz", 600.0);
-    command_rate_hz_ = declare_parameter<double>("command_rate_hz", 300.0);
+    target_poll_hz_ = declare_parameter<double>("target_poll_hz", 200.0);
+    state_poll_hz_ = declare_parameter<double>("state_poll_hz", 400.0);
+    command_rate_hz_ = declare_parameter<double>("command_rate_hz", 200.0);
     target_timeout_ns_ = static_cast<std::int64_t>(declare_parameter<double>("target_timeout_ms", 100.0) * 1e6);
     feedback_timeout_ns_ = static_cast<std::int64_t>(declare_parameter<double>("feedback_timeout_ms", 20.0) * 1e6);
     feedback_margin_ = declare_parameter<double>("feedback_actuator_margin_deg", 2.0) * M_PI / 180.0;
@@ -376,7 +376,7 @@ private:
       }
       solution.header.frame_id = "rsu_state";
       // Preserve the legacy protocol meaning: seq identifies the policy target
-      // whose q_target is being held across the 300 Hz command publications.
+      // whose q_target is being held across the 200 Hz command publications.
       solution.seq = target.source_seq;
       solution.left_actuator_1.q_target = target.actuator_target[0];
       solution.left_actuator_2.q_target = target.actuator_target[1];
@@ -420,9 +420,9 @@ private:
   std::unique_ptr<ImpedanceMapper> left_mapper_;
   std::unique_ptr<ImpedanceMapper> right_mapper_;
   std::array<std::int64_t, 4> motor_ids_{};
-  double target_poll_hz_{300.0};
-  double state_poll_hz_{600.0};
-  double command_rate_hz_{300.0};
+  double target_poll_hz_{200.0};
+  double state_poll_hz_{400.0};
+  double command_rate_hz_{200.0};
   std::int64_t target_timeout_ns_{100000000};
   std::int64_t feedback_timeout_ns_{20000000};
   double feedback_margin_{0.0};

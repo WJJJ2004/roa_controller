@@ -28,7 +28,7 @@ TEST(RsuModel, NeutralStateAndImpedance)
   lut.load(RSU_V2_TEST_LUT);
   StateEstimator estimator(lut);
   estimator.reset({0.0, 0.0}, {0.0, 0.0});
-  const auto state = estimator.update({0.0, 0.0}, {0.0, 0.0}, 1.0 / 300.0);
+  const auto state = estimator.update({0.0, 0.0}, {0.0, 0.0}, 1.0 / 200.0);
   ASSERT_TRUE(state.valid);
   EXPECT_NEAR(state.q[0], 0.0, 1e-7);
   EXPECT_NEAR(state.q[1], 0.0, 1e-7);

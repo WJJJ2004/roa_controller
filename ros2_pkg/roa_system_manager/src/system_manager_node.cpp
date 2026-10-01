@@ -359,7 +359,7 @@ void SystemManagerNode::publish_init_pos()
 void SystemManagerNode::handleBoot(const rclcpp::Time& tnow)
 {
   // 핵심 요구사항:
-  // activate 성공 전까지는 BOOT 어디에 있든 100Hz로 init pose hold 발행
+  // activate 성공 전까지는 BOOT 어디에 있든 200Hz로 init pose hold 발행
   if (!controller_activated_) {
     publishInitPosIfNeeded(tnow);
   }

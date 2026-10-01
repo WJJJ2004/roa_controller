@@ -77,7 +77,7 @@ private:
   void publish_controller_status(); // 10 hz status pub loop
 
   void InferenceLoop(); // 50Hz
-  void ControlLoop();     // 100Hz
+  void ControlLoop();     // 200Hz
 
   void declareAndLoadParams();
   void setupRosInterfaces();
@@ -92,7 +92,7 @@ private:
 
 // Policy q_target LPF
 bool policy_target_lpf_enabled_ = true;
-double policy_target_lpf_cutoff_hz_ = 1.5;
+double policy_target_lpf_cutoff_hz_ = 10.0;
 
 std::array<float, kActDim> q_target_lpf_state_{};
 bool q_target_lpf_initialized_ = false;
@@ -223,7 +223,7 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   // std_msgs::msg::Float32MultiArray last_hw_cmd_;
 
   // parameters
-  double hw_rate_hz_{100.0};
+  double hw_rate_hz_{200.0};
   double policy_rate_hz_{50.0};
   double status_rate_hz_{10.0};
 

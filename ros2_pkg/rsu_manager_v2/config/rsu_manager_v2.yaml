@@ -1,9 +1,9 @@
 rsu_manager_v2:
   ros__parameters:
     lut_file: ""
-    target_poll_hz: 300.0
-    state_poll_hz: 600.0
-    command_rate_hz: 300.0
+    target_poll_hz: 200.0
+    state_poll_hz: 400.0
+    command_rate_hz: 200.0
     target_timeout_ms: 100.0
     feedback_timeout_ms: 20.0
     feedback_actuator_margin_deg: 2.0
