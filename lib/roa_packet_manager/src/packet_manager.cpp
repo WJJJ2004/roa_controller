@@ -8,21 +8,7 @@ namespace roa_packet_manager
 
 const std::array<PacketManager::JointMeta, PacketManager::kMotorCount>
 PacketManager::kJointMetaTable{{
-<<<<<<< Updated upstream
-  {"torso_yaw",          9,   75.0f,   2.5f},
-  {"left_hip_pitch",    10,  150.0f,  24.722f},
-  {"right_hip_pitch",   11,  150.0f,  24.722f},
-  {"left_hip_roll",     12,  200.0f,  26.387f},
-  {"right_hip_roll",    13,  200.0f,  26.387f},
-  {"left_hip_yaw",      14,  100.0f,   3.419f},
-  {"right_hip_yaw",     15,  100.0f,   3.419f},
-  {"left_knee_pitch",   16,  150.0f,   8.654f},
-  {"right_knee_pitch",  17,  150.0f,   8.654f},
-  {"left_rsu_upper",    18,  15.75f,  2.5f},
-  {"right_rsu_upper",   19,  15.75f,  2.5f},
-  {"left_rsu_lower",    20,  15.75f,  2.5f},
-  {"right_rsu_lower",   21,  15.75f,  2.5f},
-=======
+
   {"left_shoulder_pitch",   0,   50.0f,   2.0f},
   {"right_shoulder_pitch",  1,   50.0f,   2.0f},
   {"left_shoulder_roll",    2,   50.0f,   2.0f},
@@ -46,7 +32,6 @@ PacketManager::kJointMetaTable{{
   {"right_rsu_lower",      21,  15.75f,   2.5f},
   {"upper_body_22",        22,   50.0f,   2.0f},
   {"upper_body_23",        23,   50.0f,   2.0f},
->>>>>>> Stashed changes
 }};
 
 bool PacketManager::valid_motor_cmd(const Command12Dof& cmd)
