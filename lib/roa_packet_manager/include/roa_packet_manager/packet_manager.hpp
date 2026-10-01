@@ -78,18 +78,22 @@ public:
     MotorSample right_rsu_lower;
   };
 
-  static constexpr std::size_t kMotorCount = 13;
-  static constexpr int kMinMotorId = 9;
-  static constexpr int kMaxMotorId = 21;
+  static constexpr std::size_t kMotorCount = 23;
+  static constexpr std::size_t kStateMotorCount = 13;
+  static constexpr int kMinMotorId = 0;
+  static constexpr int kMaxMotorId = 23;
+  static constexpr int kUnusedMotorId = 8;
 
   static const std::array<JointMeta, kMotorCount> kJointMetaTable;
 
   static bool valid_motor_cmd(const Command12Dof& cmd);
   static constexpr int motor_id_to_slot(int motor_id)
   {
-    return (motor_id >= kMinMotorId && motor_id <= kMaxMotorId)
-      ? (motor_id - kMinMotorId)
-      : -1;
+    if (motor_id < kMinMotorId || motor_id > kMaxMotorId ||
+        motor_id == kUnusedMotorId) {
+      return -1;
+    }
+    return motor_id < kUnusedMotorId ? motor_id : motor_id - 1;
   }
 
   static const char* motor_id_to_name(int motor_id);
@@ -105,6 +109,11 @@ public:
     const std::string& frame_id = "");
 
 private:
+  static constexpr int state_motor_id_to_slot(int motor_id)
+  {
+    return (motor_id >= 9 && motor_id <= 21) ? motor_id - 9 : -1;
+  }
+
   static roa_interfaces::msg::MotorCommand make_command(
     uint16_t motor_id,
     float position,

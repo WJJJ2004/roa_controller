@@ -45,4 +45,11 @@ ament_export_dependencies(
   roa_interfaces
 )
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_packet_manager test/test_packet_manager.cpp)
+  target_link_libraries(test_packet_manager ${PROJECT_NAME})
+  ament_target_dependencies(test_packet_manager rclcpp roa_interfaces)
+endif()
+
 ament_package()

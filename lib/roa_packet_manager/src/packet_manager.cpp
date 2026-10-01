@@ -8,6 +8,7 @@ namespace roa_packet_manager
 
 const std::array<PacketManager::JointMeta, PacketManager::kMotorCount>
 PacketManager::kJointMetaTable{{
+<<<<<<< Updated upstream
   {"torso_yaw",          9,   75.0f,   2.5f},
   {"left_hip_pitch",    10,  150.0f,  24.722f},
   {"right_hip_pitch",   11,  150.0f,  24.722f},
@@ -21,6 +22,31 @@ PacketManager::kJointMetaTable{{
   {"right_rsu_upper",   19,  15.75f,  2.5f},
   {"left_rsu_lower",    20,  15.75f,  2.5f},
   {"right_rsu_lower",   21,  15.75f,  2.5f},
+=======
+  {"left_shoulder_pitch",   0,   50.0f,   2.0f},
+  {"right_shoulder_pitch",  1,   50.0f,   2.0f},
+  {"left_shoulder_roll",    2,   50.0f,   2.0f},
+  {"right_shoulder_roll",   3,   50.0f,   2.0f},
+  {"left_arm_yaw",          4,   50.0f,   2.0f},
+  {"right_arm_yaw",         5,   50.0f,   2.0f},
+  {"left_arm_pitch",        6,   50.0f,   2.0f},
+  {"right_arm_pitch",       7,   50.0f,   2.0f},
+  {"torso_yaw",             9,   50.0f,   2.0f},
+  {"left_hip_pitch",       10,  150.0f,  24.722f},
+  {"right_hip_pitch",      11,  150.0f,  24.722f},
+  {"left_hip_roll",        12,  200.0f,  26.387f},
+  {"right_hip_roll",       13,  200.0f,  26.387f},
+  {"left_hip_yaw",         14,  100.0f,   3.419f},
+  {"right_hip_yaw",        15,  100.0f,   3.419f},
+  {"left_knee_pitch",      16,  150.0f,   8.654f},
+  {"right_knee_pitch",     17,  150.0f,   8.654f},
+  {"left_rsu_upper",       18,  15.75f,   2.5f},
+  {"right_rsu_upper",      19,  15.75f,   2.5f},
+  {"left_rsu_lower",       20,  15.75f,   2.5f},
+  {"right_rsu_lower",      21,  15.75f,   2.5f},
+  {"upper_body_22",        22,   50.0f,   2.0f},
+  {"upper_body_23",        23,   50.0f,   2.0f},
+>>>>>>> Stashed changes
 }};
 
 bool PacketManager::valid_motor_cmd(const Command12Dof& cmd)
@@ -67,10 +93,10 @@ bool PacketManager::decode_motor_state(
   HardwareState& out,
   std::string* error)
 {
-  std::array<MotorSample, kMotorCount> samples{};
+  std::array<MotorSample, kStateMotorCount> samples{};
 
   for (const auto& state : msg.states) {
-    const int slot = motor_id_to_slot(static_cast<int>(state.motor_id));
+    const int slot = state_motor_id_to_slot(static_cast<int>(state.motor_id));
     if (slot < 0) {
       continue;
     }
@@ -93,7 +119,7 @@ bool PacketManager::decode_motor_state(
   }
 
   const auto require = [&samples](int motor_id) -> const MotorSample* {
-    const int slot = motor_id_to_slot(motor_id);
+    const int slot = state_motor_id_to_slot(motor_id);
     if (slot < 0) {
       return nullptr;
     }
@@ -159,24 +185,33 @@ roa_interfaces::msg::MotorCommandArray PacketManager::build(
   msg.header.frame_id = frame_id;
   msg.commands.reserve(kMotorCount);
 
-  msg.commands.push_back(make_command(
-    kJointMetaTable[0].motor_id,
-    0.0f,
-    kp_scale * kJointMetaTable[0].kp,
-    kd_scale * kJointMetaTable[0].kd));
+  const auto append_fixed_hold = [&msg](const JointMeta& joint) {
+    msg.commands.push_back(make_command(
+      joint.motor_id,
+      0.0f,
+      kp_scale * joint.kp,
+      kd_scale * joint.kd));
+  };
 
-  msg.commands.push_back(make_command(kJointMetaTable[1].motor_id, cmd.left_hip_pitch, kp_scale * kJointMetaTable[1].kp, kd_scale * kJointMetaTable[1].kd));
-  msg.commands.push_back(make_command(kJointMetaTable[2].motor_id, cmd.right_hip_pitch, kp_scale * kJointMetaTable[2].kp, kd_scale * kJointMetaTable[2].kd));
-  msg.commands.push_back(make_command(kJointMetaTable[3].motor_id, cmd.left_hip_roll, kp_scale * kJointMetaTable[3].kp, kd_scale * kJointMetaTable[3].kd));
-  msg.commands.push_back(make_command(kJointMetaTable[4].motor_id, cmd.right_hip_roll, kp_scale * kJointMetaTable[4].kp, kd_scale * kJointMetaTable[4].kd));
-  msg.commands.push_back(make_command(kJointMetaTable[5].motor_id, cmd.left_hip_yaw, kp_scale * kJointMetaTable[5].kp, kd_scale * kJointMetaTable[5].kd));
-  msg.commands.push_back(make_command(kJointMetaTable[6].motor_id, cmd.right_hip_yaw, kp_scale * kJointMetaTable[6].kp, kd_scale * kJointMetaTable[6].kd));
-  msg.commands.push_back(make_command(kJointMetaTable[7].motor_id, cmd.left_knee_pitch, kp_scale * kJointMetaTable[7].kp, kd_scale * kJointMetaTable[7].kd));
-  msg.commands.push_back(make_command(kJointMetaTable[8].motor_id, cmd.right_knee_pitch, kp_scale * kJointMetaTable[8].kp, kd_scale * kJointMetaTable[8].kd));
-  msg.commands.push_back(make_command(kJointMetaTable[9].motor_id, cmd.left_rsu_upper, cmd.left_rsu_upper_kp, cmd.left_rsu_upper_kd));
-  msg.commands.push_back(make_command(kJointMetaTable[10].motor_id, cmd.right_rsu_upper, cmd.right_rsu_upper_kp, cmd.right_rsu_upper_kd));
-  msg.commands.push_back(make_command(kJointMetaTable[11].motor_id, cmd.left_rsu_lower, cmd.left_rsu_lower_kp, cmd.left_rsu_lower_kd));
-  msg.commands.push_back(make_command(kJointMetaTable[12].motor_id, cmd.right_rsu_lower, cmd.right_rsu_lower_kp, cmd.right_rsu_lower_kd));
+  for (std::size_t i = 0; i <= 8; ++i) {
+    append_fixed_hold(kJointMetaTable[i]);
+  }
+
+  msg.commands.push_back(make_command(kJointMetaTable[9].motor_id, cmd.left_hip_pitch, kp_scale * kJointMetaTable[9].kp, kd_scale * kJointMetaTable[9].kd));
+  msg.commands.push_back(make_command(kJointMetaTable[10].motor_id, cmd.right_hip_pitch, kp_scale * kJointMetaTable[10].kp, kd_scale * kJointMetaTable[10].kd));
+  msg.commands.push_back(make_command(kJointMetaTable[11].motor_id, cmd.left_hip_roll, kp_scale * kJointMetaTable[11].kp, kd_scale * kJointMetaTable[11].kd));
+  msg.commands.push_back(make_command(kJointMetaTable[12].motor_id, cmd.right_hip_roll, kp_scale * kJointMetaTable[12].kp, kd_scale * kJointMetaTable[12].kd));
+  msg.commands.push_back(make_command(kJointMetaTable[13].motor_id, cmd.left_hip_yaw, kp_scale * kJointMetaTable[13].kp, kd_scale * kJointMetaTable[13].kd));
+  msg.commands.push_back(make_command(kJointMetaTable[14].motor_id, cmd.right_hip_yaw, kp_scale * kJointMetaTable[14].kp, kd_scale * kJointMetaTable[14].kd));
+  msg.commands.push_back(make_command(kJointMetaTable[15].motor_id, cmd.left_knee_pitch, kp_scale * kJointMetaTable[15].kp, kd_scale * kJointMetaTable[15].kd));
+  msg.commands.push_back(make_command(kJointMetaTable[16].motor_id, cmd.right_knee_pitch, kp_scale * kJointMetaTable[16].kp, kd_scale * kJointMetaTable[16].kd));
+  msg.commands.push_back(make_command(kJointMetaTable[17].motor_id, cmd.left_rsu_upper, cmd.left_rsu_upper_kp, cmd.left_rsu_upper_kd));
+  msg.commands.push_back(make_command(kJointMetaTable[18].motor_id, cmd.right_rsu_upper, cmd.right_rsu_upper_kp, cmd.right_rsu_upper_kd));
+  msg.commands.push_back(make_command(kJointMetaTable[19].motor_id, cmd.left_rsu_lower, cmd.left_rsu_lower_kp, cmd.left_rsu_lower_kd));
+  msg.commands.push_back(make_command(kJointMetaTable[20].motor_id, cmd.right_rsu_lower, cmd.right_rsu_lower_kp, cmd.right_rsu_lower_kd));
+
+  append_fixed_hold(kJointMetaTable[21]);
+  append_fixed_hold(kJointMetaTable[22]);
 
   return msg;
 }
