@@ -14,8 +14,8 @@ roa_main_controller:
     policy_cmd_timeout_ms: 50.0
 
     # 0이면 /motor_command publish 안 함
-    # HW가 요구하는 길이로 맞춰줘야 함 (미확정)
-    motor_command_len: 40
+    # Physical packet: 23 motors; policy remains 12 virtual joints.
+    motor_command_len: 23
 
     rsu_frame_id: base_link
 
@@ -29,7 +29,7 @@ roa_main_controller:
       motor_state_sub: /hardware_interface/state
       rsu_state_sub: /rsu/state
     policy_target_lpf:
-      enabled: true
+      enabled: false
       cutoff_hz: 10.0
 
 # system_manager_node:

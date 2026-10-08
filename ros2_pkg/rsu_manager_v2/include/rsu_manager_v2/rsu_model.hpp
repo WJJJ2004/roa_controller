@@ -28,9 +28,7 @@ public:
 private:
   const RsuLut & lut_;
   std::array<double, 2> q_prev_{};
-  std::array<double, 2> qd_prev_{};
   std::array<double, 2> alpha_seed_{};
-  bool initialized_{false};
 };
 
 struct ImpedanceConfig

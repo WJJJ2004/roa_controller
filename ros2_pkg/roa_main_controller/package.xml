@@ -16,6 +16,7 @@
   <depend>roa_interfaces</depend>
   <depend>roa_packet_manager</depend>
   <depend>roa_common</depend>
+  <depend>roa_policy_driver</depend>
 
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>

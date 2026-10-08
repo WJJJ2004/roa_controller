@@ -91,7 +91,7 @@ private:
 private:
 
 // Policy q_target LPF
-bool policy_target_lpf_enabled_ = true;
+bool policy_target_lpf_enabled_ = false;
 double policy_target_lpf_cutoff_hz_ = 10.0;
 
 std::array<float, kActDim> q_target_lpf_state_{};
@@ -101,7 +101,7 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
 
   rclcpp::Time walk_blend_start_time_;
   bool walk_blend_enabled_ = true;
-  double walk_blend_duration_sec_ = 3.0;
+  double walk_blend_duration_sec_ = 1.0;
 
   static std::array<float, kActDim>
   initLastAction()
@@ -234,7 +234,7 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   double motor_state_timeout_ms_{50.0};
   double policy_cmd_timeout_ms_{50.0};
 
-  int walk_len_{40};
+  int walk_len_{23};
 
   std::string rsu_frame_id_{"base_link"};
 

@@ -38,9 +38,7 @@ StateEstimator::StateEstimator(const RsuLut & lut) : lut_(lut) {}
 void StateEstimator::reset(const std::array<double, 2> & q, const std::array<double, 2> & alpha)
 {
   q_prev_ = q;
-  qd_prev_ = {0.0, 0.0};
   alpha_seed_ = alpha;
-  initialized_ = true;
 }
 
 StateResult StateEstimator::update(
@@ -80,24 +78,17 @@ StateResult StateEstimator::update(
   bool velocity_ok = false;
   const auto qd_jac = damped_inverse(query.jacobian, motor_velocity, 3e-7, velocity_ok);
   if (!velocity_ok) {return out;}
-  std::array<double, 2> qd_fd{};
-  if (initialized_) {
-    qd_fd = {wrap_to_pi(q[0] - q_prev_[0]) / dt, wrap_to_pi(q[1] - q_prev_[1]) / dt};
-  }
-  constexpr double beta = 0.95;
-  constexpr double tau = 1.0 / (2.0 * M_PI * 1.5);
-  const double gamma = dt / (tau + dt);
+  // Use measured motor velocity through the LUT-derived Jacobian directly.
+  // Retain algebraic damping and the original observation velocity bounds.
+  // No position-difference mixing or temporal LPF.
   for (std::size_t i = 0; i < 2; ++i) {
-    const double raw = beta * qd_jac[i] + (1.0 - beta) * qd_fd[i];
-    out.qd[i] = std::clamp(qd_prev_[i] + gamma * (raw - qd_prev_[i]), -5.235987756, 5.235987756);
+    out.qd[i] = std::clamp(qd_jac[i], -5.235987756, 5.235987756);
   }
   out.q = q;
   out.jacobian = query.jacobian;
   out.valid = true;
   q_prev_ = q;
-  qd_prev_ = out.qd;
   alpha_seed_ = query.alpha;
-  initialized_ = true;
   return out;
 }
 

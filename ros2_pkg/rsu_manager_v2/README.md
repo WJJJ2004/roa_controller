@@ -28,6 +28,17 @@ target snapshot + state snapshot
 The Jacobian and stateful impedance mappers are owned only by the state worker.
 The command worker receives completed Kp/Kd snapshots, never a mutable Jacobian.
 
+## Filter-free virtual velocity (October 7 deployment setup)
+
+The LUT supplies motor angles and the local Jacobian, not stored velocity.
+After reconstructing virtual q from measured motor positions, the estimator
+publishes `(J^T J + 3e-7 I)^-1 J^T motor_qd` with the original
++/-5.235987756 rad/s observation clamp. Numerical damping and
+finite/state-validity checks remain. Position-difference mixing and the 1.5 Hz
+temporal LPF are removed.
+Previous q is retained as the inverse-position solver seed, not for velocity
+differentiation. Target workspace/actuator limits and impedance guards remain.
+
 ## Clipping and validation
 
 The selected internal virtual workspace was certified by the supplied
