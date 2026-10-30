@@ -170,15 +170,20 @@ roa_interfaces::msg::MotorCommandArray PacketManager::build(
   msg.header.frame_id = frame_id;
   msg.commands.reserve(kMotorCount);
 
-  const auto append_fixed_hold = [&msg](const JointMeta& joint) {
+  const auto append_fixed_hold = [&msg](const JointMeta& joint, float position = 0.0f) {
     msg.commands.push_back(make_command(
       joint.motor_id,
-      0.0f,
+      position,
       kp_scale * joint.kp,
       kd_scale * joint.kd));
   };
 
-  for (std::size_t i = 0; i <= 8; ++i) {
+  append_fixed_hold(kJointMetaTable[0]);  // left_shoulder_pitch
+  append_fixed_hold(kJointMetaTable[1]);  // right_shoulder_pitch
+  // Shoulder roll offsets keep the hands clear of the hips (radians).
+  append_fixed_hold(kJointMetaTable[2], 0.15f);   // left_shoulder_roll
+  append_fixed_hold(kJointMetaTable[3], -0.15f);  // right_shoulder_roll
+  for (std::size_t i = 4; i <= 8; ++i) {
     append_fixed_hold(kJointMetaTable[i]);
   }
 

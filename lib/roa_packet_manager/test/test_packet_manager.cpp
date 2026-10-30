@@ -46,7 +46,7 @@ TEST(PacketManager, BuildsComplete23MotorPacket)
   }
 }
 
-TEST(PacketManager, HoldsUpperBodyAtZeroWithTorsoGains)
+TEST(PacketManager, HoldsUpperBodyWithShoulderRollOffsetsAndTorsoGains)
 {
   const auto message = PacketManager::build(
     PacketManager::Command12Dof{}, rclcpp::Time(0, 0), "test");
@@ -57,7 +57,8 @@ TEST(PacketManager, HoldsUpperBodyAtZeroWithTorsoGains)
     const auto* command = find_command(message, id);
     ASSERT_NE(command, nullptr) << "motor_id=" << id;
     EXPECT_FLOAT_EQ(command->torque, 0.0f) << "motor_id=" << id;
-    EXPECT_FLOAT_EQ(command->position, 0.0f) << "motor_id=" << id;
+    const float expected_position = id == 2 ? 0.15f : (id == 3 ? -0.15f : 0.0f);
+    EXPECT_FLOAT_EQ(command->position, expected_position) << "motor_id=" << id;
     EXPECT_FLOAT_EQ(command->velocity, 0.0f) << "motor_id=" << id;
     EXPECT_FLOAT_EQ(command->kp, 50.0f) << "motor_id=" << id;
     EXPECT_FLOAT_EQ(command->kd, 2.0f) << "motor_id=" << id;
