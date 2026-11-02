@@ -57,9 +57,20 @@ LUT-derived actuator extrema. Feedback is never clipped: a value outside those
 extrema plus the configured two-degree measurement margin invalidates the
 state, so a sensor/calibration fault is not hidden.
 
-The v2 Kd upper bound is 4.9, deliberately below the existing main
-controller's strict `kd < 5.0` acceptance check. The validated trajectory is
-around 0.57--0.58, so this interface guard does not alter the measured mapping.
+The default YAML requests twice the original virtual gains: pitch Kp/Kd
+`50 / 2.4`, roll Kp/Kd `68.5 / 3.288` (roll/pitch ratio `1.37`). Fixed motor
+bounds are Kp `[5, 45]` and Kd `[0.2, 2.5]`. They cover tuning from 1x to 3x
+the original pitch gains `25 / 1.2` with that axis ratio unchanged. A 0.0625
+degree grid sweep (687,921 poses per scale) found a maximum motor Kp/Kd of
+`41.3854 / 1.9865` at 3x, without bound activation. This is an offline sampled
+mapping check, not a hardware stability guarantee. The main controller accepts
+RSU solutions only when `0 < kp < 50` and `0 < kd < 5`.
+
+System-manager boot and main-controller initial/debug holds share
+`roa_common/pose.hpp`: ankle actuator Kp/Kd are `31.5 / 5.0`, twice their prior
+`15.75 / 2.5`. These fixed commands bypass the RSU-solution gain check; the
+remaining joints retain their gains. The historical `chirp_replay.yaml`
+explicitly retains its original gains and limits for baseline comparisons.
 
 ## Run
 

@@ -24,6 +24,18 @@ inline roa_packet_manager::PacketManager::Command12Dof make_init_pose()
   init_pos.left_rsu_lower = pose.left_rsu_lower;
   init_pos.right_rsu_lower = pose.right_rsu_lower;
 
+  // Boot/initial hold uses actuator-space ankle gains (2x 15.75 / 2.5).
+  // Shared with the main controller's initial/debug pose to avoid a gain
+  // change when ownership transfers from the system manager.
+  init_pos.left_rsu_upper_kp = 31.5f;
+  init_pos.right_rsu_upper_kp = 31.5f;
+  init_pos.left_rsu_lower_kp = 31.5f;
+  init_pos.right_rsu_lower_kp = 31.5f;
+  init_pos.left_rsu_upper_kd = 5.0f;
+  init_pos.right_rsu_upper_kd = 5.0f;
+  init_pos.left_rsu_lower_kd = 5.0f;
+  init_pos.right_rsu_lower_kd = 5.0f;
+
   return init_pos;
 }
 

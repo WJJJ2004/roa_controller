@@ -83,3 +83,41 @@ TEST(RsuModel, PositionDifferenceDoesNotContaminateMeasuredZeroVelocity)
   EXPECT_DOUBLE_EQ(state.qd[0], 0.0);
   EXPECT_DOUBLE_EQ(state.qd[1], 0.0);
 }
+
+TEST(RsuModel, FixedEnvelopeSupportsOneToThreeTimesBaseline)
+{
+  RsuLut lut;
+  lut.load(RSU_V2_TEST_LUT);
+  // Include LUT knots and half-cell positions; scaling both virtual axes
+  // must scale motor gains without activating either bound.
+  for (int r = 0; r <= 284; ++r) {
+    for (int p = 0; p <= 604; ++p) {
+      const auto query = lut.query(
+        lut.roll_min() + (lut.roll_max() - lut.roll_min()) * r / 284.0,
+        lut.pitch_min() + (lut.pitch_max() - lut.pitch_min()) * p / 604.0);
+      ASSERT_TRUE(query.valid);
+      rsu_manager_v2::ImpedanceConfig baseline;
+      baseline.virtual_pitch_kp = 25.0;
+      baseline.virtual_pitch_kd = 1.2;
+      ImpedanceMapper base_mapper(baseline);
+      const auto base = base_mapper.compute(query.jacobian, true);
+      ASSERT_TRUE(base.valid);
+      ASSERT_FALSE(base.saturated);
+      for (double scale : {2.0, 3.0}) {
+        auto config = baseline;
+        config.virtual_pitch_kp *= scale;
+        config.virtual_pitch_kd *= scale;
+        ImpedanceMapper mapper(config);
+        const auto result = mapper.compute(query.jacobian, true);
+        ASSERT_TRUE(result.valid);
+        ASSERT_FALSE(result.saturated);
+        for (int i = 0; i < 2; ++i) {
+          ASSERT_NEAR(result.kp[i], scale * base.kp[i], 1e-9);
+          ASSERT_NEAR(result.kd[i], scale * base.kd[i], 1e-9);
+          ASSERT_LT(result.kp[i], 45.0);
+          ASSERT_LT(result.kd[i], 2.5);
+        }
+      }
+    }
+  }
+}

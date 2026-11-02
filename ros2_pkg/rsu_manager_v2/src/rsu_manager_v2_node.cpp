@@ -176,13 +176,13 @@ public:
     right_estimator_->reset(initial_q, initial_alpha);
 
     ImpedanceConfig impedance;
-    impedance.virtual_pitch_kp = declare_parameter<double>("virtual_pitch_kp", 25.0);
-    impedance.virtual_pitch_kd = declare_parameter<double>("virtual_pitch_kd", 1.2);
+    impedance.virtual_pitch_kp = declare_parameter<double>("virtual_pitch_kp", impedance.virtual_pitch_kp);
+    impedance.virtual_pitch_kd = declare_parameter<double>("virtual_pitch_kd", impedance.virtual_pitch_kd);
     impedance.virtual_roll_scale = declare_parameter<double>("virtual_roll_scale", 1.37);
     impedance.kp_min = array_parameter(*this, "actuator_kp_min", std::array<double, 2>{5.0, 5.0});
-    impedance.kp_max = array_parameter(*this, "actuator_kp_max", std::array<double, 2>{25.0, 25.0});
+    impedance.kp_max = array_parameter(*this, "actuator_kp_max", impedance.kp_max);
     impedance.kd_min = array_parameter(*this, "actuator_kd_min", std::array<double, 2>{0.2, 0.2});
-    impedance.kd_max = array_parameter(*this, "actuator_kd_max", std::array<double, 2>{4.9, 4.9});
+    impedance.kd_max = array_parameter(*this, "actuator_kd_max", impedance.kd_max);
     impedance.default_kp = array_parameter(*this, "default_kp", std::array<double, 2>{9.0, 9.0});
     impedance.default_kd = array_parameter(*this, "default_kd", std::array<double, 2>{2.25, 2.25});
     left_mapper_ = std::make_unique<ImpedanceMapper>(impedance);

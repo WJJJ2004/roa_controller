@@ -11,14 +11,18 @@ rsu_manager_v2:
     right_motor_ids: [19, 21]
     initial_q: [0.0, -0.5672320]
     initial_alpha: [-0.458105, 0.458105]
-    virtual_pitch_kp: 25.0
-    virtual_pitch_kd: 1.2
+    # 2x baseline on both virtual axes; roll gains use the same scale below.
+    virtual_pitch_kp: 50.0
+    virtual_pitch_kd: 2.4
     virtual_roll_scale: 1.37
     actuator_kp_min: [5.0, 5.0]
-    actuator_kp_max: [25.0, 25.0]
+    # Fixed envelope for 1x..3x baseline (pitch Kp 25..75, Kd 1.2..3.6,
+    # roll/pitch ratio 1.37). Dense LUT sweep: motor Kp <= 41.386, Kd <= 1.987.
+    # Keep limits fixed while tuning within this range.
+    actuator_kp_max: [45.0, 45.0]
     actuator_kd_min: [0.2, 0.2]
-    # roa_main_controller requires kd < 5.0.
-    actuator_kd_max: [4.9, 4.9]
+    # roa_main_controller requires kp < 50.0 and kd < 5.0.
+    actuator_kd_max: [2.5, 2.5]
     default_kp: [9.0, 9.0]
     default_kd: [2.25, 2.25]
     publish_state_every_control_tick: true

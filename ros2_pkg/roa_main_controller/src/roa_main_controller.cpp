@@ -981,7 +981,8 @@ void RoaControllerNode::ControlLoop()
       return std::isfinite(kp) &&
             std::isfinite(kd) &&
             kp > 0.0f &&
-            kp < 40.0f &&
+            // RSU mapper allows up to 45 for the 3x tuning envelope.
+            kp < 50.0f &&
             kd > 0.0f &&
             kd < 5.0f;
     };

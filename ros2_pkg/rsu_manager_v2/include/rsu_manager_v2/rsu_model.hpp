@@ -33,14 +33,16 @@ private:
 
 struct ImpedanceConfig
 {
-  double virtual_pitch_kp{25.0};
-  double virtual_pitch_kd{1.2};
+  double virtual_pitch_kp{50.0};
+  double virtual_pitch_kd{2.4};
   double virtual_roll_scale{1.37};
   std::array<double, 2> kp_min{5.0, 5.0};
-  std::array<double, 2> kp_max{25.0, 25.0};
+  // Fixed tuning envelope: up to 3x the original 25 / 1.2 virtual gains,
+  // with the roll/pitch ratio held at 1.37.
+  std::array<double, 2> kp_max{45.0, 45.0};
   std::array<double, 2> kd_min{0.2, 0.2};
   // Main controller accepts kd strictly below 5.0.
-  std::array<double, 2> kd_max{4.9, 4.9};
+  std::array<double, 2> kd_max{2.5, 2.5};
   std::array<double, 2> default_kp{9.0, 9.0};
   std::array<double, 2> default_kd{2.25, 2.25};
   double condition_fail{50.0};
