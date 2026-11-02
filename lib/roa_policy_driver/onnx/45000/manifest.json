@@ -1,0 +1,27 @@
+{
+  "source_checkpoint": "/home/lwj/roa-sandbox/2026-10-31_00-06-26/model_45000.pt",
+  "checkpoint_sha256": "bf66fbd423ed571e34637628eb286fd0de13726102fda91ebf59c173e0bcae11",
+  "torso_com_x_dr_m": [
+    0.09,
+    0.16
+  ],
+  "files": {
+    "policy.onnx": {
+      "sha256": "502317170e88e6acabde6d8a969fb5d50255fc86c2634f412182a2a101e4863d",
+      "bytes": 758549
+    },
+    "data/golden_obs.bin": {
+      "sha256": "48c1d26e299ae528bb95c94845b4f136ab55d1821f92cf23455adaf60cb6a6d4",
+      "bytes": 180
+    },
+    "data/golden_action.bin": {
+      "sha256": "9c4711466fe739080d1646a58e1626afca740e8615f6c10be7ea72f5858b37fb",
+      "bytes": 48
+    }
+  },
+  "verification": "PASS",
+  "torch_onnx_observation_count": 146,
+  "torch_onnx_max_abs_error": 5.960464477539062e-07,
+  "golden_max_abs_error": 0.0,
+  "hardware_run": false
+}
