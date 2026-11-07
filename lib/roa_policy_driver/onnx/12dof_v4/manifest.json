@@ -1,0 +1,21 @@
+{
+  "source_checkpoint": "2026-11-06_19-45-01/model_45900.pt",
+  "checkpoint_sha256": "0fa39c6957bcd456f9cbf030fc1810bfb2cb3e97dc7f9159ff3c5f5ac751bf2f",
+  "files": {
+    "policy.onnx": {
+      "sha256": "a24ecee1692401983c13184472b90b76ba409ac52978bd77523acea14f840f3f",
+      "bytes": 758549
+    },
+    "data/golden_obs.bin": {
+      "sha256": "48c1d26e299ae528bb95c94845b4f136ab55d1821f92cf23455adaf60cb6a6d4",
+      "bytes": 180
+    },
+    "data/golden_action.bin": {
+      "sha256": "3444e4c2121fb3fd03f6ac2bbf373044cd91f6e26ac13d1e0ee7d21f88c7b53b",
+      "bytes": 48
+    }
+  },
+  "golden_observation": "first of 146 recorded reference observations used in actor export",
+  "golden_action": "ONNX Runtime float32 output for golden_observation",
+  "onnx_torch_max_abs_error_146": 4.470348358154297e-07
+}
