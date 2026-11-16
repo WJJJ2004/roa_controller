@@ -1,21 +1,13 @@
 {
-  "source_checkpoint": "2026-11-06_19-45-01/model_45900.pt",
-  "checkpoint_sha256": "0fa39c6957bcd456f9cbf030fc1810bfb2cb3e97dc7f9159ff3c5f5ac751bf2f",
-  "files": {
-    "policy.onnx": {
-      "sha256": "a24ecee1692401983c13184472b90b76ba409ac52978bd77523acea14f840f3f",
-      "bytes": 758549
-    },
-    "data/golden_obs.bin": {
-      "sha256": "48c1d26e299ae528bb95c94845b4f136ab55d1821f92cf23455adaf60cb6a6d4",
-      "bytes": 180
-    },
-    "data/golden_action.bin": {
-      "sha256": "3444e4c2121fb3fd03f6ac2bbf373044cd91f6e26ac13d1e0ee7d21f88c7b53b",
-      "bytes": 48
-    }
-  },
-  "golden_observation": "first of 146 recorded reference observations used in actor export",
-  "golden_action": "ONNX Runtime float32 output for golden_observation",
-  "onnx_torch_max_abs_error_146": 4.470348358154297e-07
+  "run": "2026-11-09_22-04-14",
+  "checkpoint": "2026-11-09_22-04-14/model_51600.pt",
+  "checkpoint_sha256": "2d023918b53195851dda0f179d9d8bdc7ef5b0405aa2220453e3748006fc7d47",
+  "template": "roa_controller/lib/roa_policy_driver/onnx/12dof_v4/policy.onnx",
+  "template_sha256": "a24ecee1692401983c13184472b90b76ba409ac52978bd77523acea14f840f3f",
+  "policy": "roa_hw_v4-2/51600/policy.onnx",
+  "policy_sha256": "12543d2ed36fd6cdf325fbc1f42a287399c0a18c0d3c3a4386299af77b7f6339",
+  "golden_obs_sha256": "48c1d26e299ae528bb95c94845b4f136ab55d1821f92cf23455adaf60cb6a6d4",
+  "golden_action_sha256": "c09b29d892ac9b2f0aeb52d83358d65b77be7ed2428b483ad75c71bbf13b4ae7",
+  "validation_observations": 146,
+  "max_onnx_torch_abs_error": 7.152557373046875e-07
 }
