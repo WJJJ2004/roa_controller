@@ -28,8 +28,8 @@ constexpr VirtualJointPose12Dof make_policy_default_virtual_pose()
   pose.right_hip_yaw = 0.13962633907794952f;
   pose.left_knee_pitch = 0.76794487237930300f;
   pose.right_knee_pitch = -0.76794487237930300f;
-  pose.left_ankle_pitch = -0.36651915311813354f;
-  pose.right_ankle_pitch = 0.36651915311813354f;
+  pose.left_ankle_pitch  = -0.36651915311813354f + 0.104719755f;  
+  pose.right_ankle_pitch =  0.36651915311813354f - 0.104719755f;  // 발목부 조립오차 6도 보정
   pose.left_ankle_roll = 0.0f;
   pose.right_ankle_roll = 0.0f;
   // WARN: DO NOT EDIT THESE VALUES. UNLESS YOU EDIT THE POLICY'S TRAINING DATA.
