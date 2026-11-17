@@ -77,7 +77,7 @@ private:
   void publish_controller_status(); // 10 hz status pub loop
 
   void InferenceLoop(); // 50Hz
-  void ControlLoop();     // 200Hz
+  void ControlLoop();     // 50Hz
 
   void declareAndLoadParams();
   void setupRosInterfaces();
@@ -223,7 +223,7 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   // std_msgs::msg::Float32MultiArray last_hw_cmd_;
 
   // parameters
-  double hw_rate_hz_{200.0};
+  double hw_rate_hz_{50.0};
   double policy_rate_hz_{50.0};
   double status_rate_hz_{10.0};
 

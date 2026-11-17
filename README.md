@@ -32,9 +32,9 @@ These versions reflect the current development and validation environment. Other
           └─────────┬───────────┘
                     │ /rsu/target
                     ▼
-             ┌─────────────┐
-             │ rsu_manager │
-             └──────┬──────┘
+             ┌────────────────┐
+             │ rsu_manager_v2 │
+             └────────┬───────┘
                     │ actuator solution
                     ▼
           /hardware_interface/command
@@ -67,7 +67,7 @@ The main controller and RobStride hardware interface are ROS 2 lifecycle nodes. 
 | `ros2_pkg/roa_main_controller` | Observation construction, policy inference, and actuator command generation | [README](./ros2_pkg/roa_main_controller/README.md) |
 | `ros2_pkg/roa_system_manager` | Controller lifecycle and safety-state management | [README](./ros2_pkg/roa_system_manager/README.md) |
 | `ros2_pkg/robstride_hardware_interface` | SocketCAN-based RobStride motor interface | [README](./ros2_pkg/robstride_hardware_interface/README.md) |
-| `ros2_pkg/rsu_manager` | RSU inverse kinematics, state estimation, impedance mapping, and test nodes | [README](./ros2_pkg/rsu_manager/README.md) |
+| `ros2_pkg/rsu_manager_v2` | RSU inverse kinematics, state estimation, and impedance mapping | [README](./ros2_pkg/rsu_manager_v2/README.md) |
 | `ros2_pkg/imu_pkg` | EBIMU serial driver and ROS publisher | [README](./ros2_pkg/imu_pkg/README.md) |
 | `ros2_pkg/roa_cmd_test` | Gamepad-based velocity command test node | — |
 | `ros2_pkg/roa_visualizer` | RViz bridge for motor and RSU commands | [README](./ros2_pkg/roa_visualizer/README.md) |
@@ -159,10 +159,9 @@ Review at least the following files before running on hardware:
 
 | File | Main Settings |
 | --- | --- |
-| `ros2_pkg/robstride_hardware_interface/config/motor_setting.yaml` | CAN interface names, motor IDs and types, 300 Hz control rate |
-| `ros2_pkg/roa_main_controller/config/params.yaml` | 300 Hz hardware command rate, 50 Hz policy rate, timeouts, and topics |
-| `ros2_pkg/rsu_manager/config/rsu_imp_rt.yaml` | Non-neutral RSU seeds and impedance gains |
-| `ros2_pkg/rsu_manager/config/rsu_imp_sample.yaml` | Neutral seeds for sample collection |
+| `ros2_pkg/robstride_hardware_interface/config/motor_setting.yaml` | CAN interface names, motor IDs and types, 50 Hz control rate |
+| `ros2_pkg/roa_main_controller/config/params.yaml` | 50 Hz hardware command rate, 50 Hz policy rate, timeouts, and topics |
+| `ros2_pkg/rsu_manager_v2/config/rsu_manager_v2.yaml` | RSU worker rates, feedback timeout, initial seeds, and impedance gains |
 | `ros2_pkg/imu_pkg/config/params.yaml` | Serial port, unit conversion, and 50 Hz publish rate |
 | `lib/roa_common/include/roa_common/constants.hpp` | Initial pose and policy reference joint angles |
 
@@ -214,13 +213,7 @@ The controller may report a fault when required input topics are missing or stal
 Run the standard impedance solver:
 
 ```bash
-ros2 launch rsu_manager solver_node.launch.py
-```
-
-Run the symmetric chirp sample generator with neutral seeds:
-
-```bash
-ros2 launch rsu_manager sample_generate.launch.py
+ros2 launch rsu_manager_v2 rsu_manager_v2.launch.py
 ```
 
 `hw_test.launch.py`, `imp_hw_test.launch.py`, and `init_pose_tunning.launch.py` are hardware test launch files that generate actuator commands. Do not run them without first validating the configuration and physical robot state.
@@ -269,10 +262,10 @@ ros2 launch imu_pkg imu.launch.py
 ```
 
 ```bash
-ros2 launch rsu_manager solver_node.launch.py
+ros2 launch rsu_manager_v2 rsu_manager_v2.launch.py
 ```
 
-Confirm that the initial seeds in `rsu_imp_rt.yaml` match the current mechanism pose before starting the solver.
+Confirm that `initial_q` and `initial_alpha` in `rsu_manager_v2.yaml` match the current mechanism pose before starting the solver.
 
 ### 4. Start the Main Controller
 
@@ -311,6 +304,7 @@ ros2 run roa_cmd_test roa_cmd_test
 ```
 
 Verify that commands are published on `/ctrl/policy_cmd`.
+The node publishes the gamepad reader's velocity values directly at 50 Hz, bounded to the sim2sim ranges `vx ±1.0 m/s`, `vy ±0.5 m/s`, and `wz ±1.0 rad/s`. It publishes zero immediately when the gamepad command is disabled, disconnected, or invalid. The previous `rise_time_s`, `return_time_s`, and `publish_zero_when_disabled` parameters no longer apply.
 
 ## Topics
 
