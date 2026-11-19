@@ -5,23 +5,23 @@ It intentionally preserves the existing external topics and message types:
 
 - input `/rsu/target` (`roa_interfaces/msg/RsuTarget`)
 - input `/hardware_interface/state` (`MotorStateArray`)
-- output `/rsu/imp_solution` (`RsuImpSol`), fixed 50 Hz
-- output `/rsu/state` (`RsuStateArray`), fixed 50 Hz
+- output `/rsu/imp_solution` (`RsuImpSol`), fixed 200 Hz
+- output `/rsu/state` (`RsuStateArray`), fixed 200 Hz
 
 The node is one process with three parallel workers:
 
 ```text
 ROS target callback -> atomic immutable latch
-                         -> 50 Hz target worker, IK only for a new target
+                         -> 200 Hz target worker, IK only for a new target
                          -> target snapshot (held between 50 Hz inference ticks)
 
 ROS feedback callback -> bounded SPSC queue
-                         -> 100 Hz state worker drains every received sample
+                         -> 400 Hz state worker drains every received sample
                          -> LUT estimator -> Jacobian -> Kp/Kd
                          -> state/impedance snapshot
 
 target snapshot + state snapshot
-                         -> fixed 50 Hz command worker
+                         -> fixed 200 Hz command worker
                          -> /rsu/imp_solution and /rsu/state
 ```
 

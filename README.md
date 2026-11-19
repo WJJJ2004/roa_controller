@@ -159,8 +159,8 @@ Review at least the following files before running on hardware:
 
 | File | Main Settings |
 | --- | --- |
-| `ros2_pkg/robstride_hardware_interface/config/motor_setting.yaml` | CAN interface names, motor IDs and types, 50 Hz control rate |
-| `ros2_pkg/roa_main_controller/config/params.yaml` | 50 Hz hardware command rate, 50 Hz policy rate, timeouts, and topics |
+| `ros2_pkg/robstride_hardware_interface/config/motor_setting.yaml` | CAN interface names, motor IDs and types, 200 Hz control rate |
+| `ros2_pkg/roa_main_controller/config/params.yaml` | 200 Hz hardware command rate, 50 Hz policy rate, timeouts, and topics |
 | `ros2_pkg/rsu_manager_v2/config/rsu_manager_v2.yaml` | RSU worker rates, feedback timeout, initial seeds, and impedance gains |
 | `ros2_pkg/imu_pkg/config/params.yaml` | Serial port, unit conversion, and 50 Hz publish rate |
 | `lib/roa_common/include/roa_common/constants.hpp` | Initial pose and policy reference joint angles |
@@ -305,6 +305,8 @@ ros2 run roa_cmd_test roa_cmd_test
 
 Verify that commands are published on `/ctrl/policy_cmd`.
 The node publishes the gamepad reader's velocity values directly at 50 Hz, bounded to the sim2sim ranges `vx ±1.0 m/s`, `vy ±0.5 m/s`, and `wz ±1.0 rad/s`. It publishes zero immediately when the gamepad command is disabled, disconnected, or invalid. The previous `rise_time_s`, `return_time_s`, and `publish_zero_when_disabled` parameters no longer apply.
+
+Stick neutral uses `stick_deadzone=0.05` (5% of normalized half-range, inclusive) before velocity scaling on each axis; a larger device-provided flat region is preserved. Inside this region the command is exactly zero; outside it input passes through without a ramp or range rescaling. For example, tune it with `ros2 run roa_cmd_test roa_cmd_test --ros-args -p stick_deadzone:=0.08`. Startup logs identify the loaded node/reader source paths and axis ranges/flat values; command logs distinguish neutral from enabled output and show input velocity versus published velocity. The main controller also zeros its policy command if no fresh velocity message arrives within `cmd_timeout_ms` (default 50 ms).
 
 ## Topics
 

@@ -12,6 +12,7 @@
 # - This reads from kernel input events (Handlers=eventX jsY).
 # - It does NOT use hidraw/hidapi, so it avoids open() / open_path() issues.
 
+import math
 import threading
 import time
 from typing import Optional, Dict
@@ -27,11 +28,11 @@ except ImportError as e:
     ) from e
 
 
-def _interpolate(value, old_max, new_scale, deadzone=0.01):
+def _interpolate(value, old_max, new_scale):
     # value is already in [-old_max, old_max]
-    ret = value * new_scale / old_max
-    if abs(ret) < deadzone:
+    if value == 0.0:
         return 0.0
+    ret = value * new_scale / old_max
     return ret
 
 
@@ -51,18 +52,20 @@ def _interpolate(value, old_max, new_scale, deadzone=0.01):
 #     center = (mx + mn) / 2.0
 #     half_range = (mx - mn) / 2.0
 #     return float((value - center) / half_range)
-def _normalize_abs(value: int, absinfo) -> float:
+def _normalize_abs(value: int, absinfo, deadzone: float = 0.05) -> float:
     mn = absinfo.min
     mx = absinfo.max
-    if mx == mn:
+    if mx <= mn:
         return 0.0
     center = (mx + mn) / 2.0
     half_range = (mx - mn) / 2.0
 
-    if abs(value - center) <= absinfo.flat:
+    # Apply one normalized deadzone before velocity scaling, on every axis.
+    # Keep the device's larger flat region when provided by its driver.
+    if abs(value - center) <= max(absinfo.flat, deadzone * half_range):
         return 0.0
 
-    return float((value - center) / half_range)
+    return float(np.clip((value - center) / half_range, -1.0, 1.0))
 
 class Gamepad:
     """
@@ -80,7 +83,13 @@ class Gamepad:
         vel_scale_rot: float = 1.0,
         device_path: Optional[str] = None,
         prefer_name_contains: str = "Wireless Controller",  # optional hint
+        stick_deadzone: float = 0.05,
+        logger=None,
     ):
+        if not math.isfinite(stick_deadzone) or not 0.0 <= stick_deadzone < 1.0:
+            raise ValueError("stick_deadzone must be finite and in [0, 1)")
+        self._stick_deadzone = stick_deadzone
+        self._logger = logger
         self._vendor_id = vendor_id
         self._product_id = product_id
         self._vel_scale_x = vel_scale_x
@@ -102,6 +111,12 @@ class Gamepad:
 
         self.read_thread = threading.Thread(target=self.read_loop, daemon=True)
         self.read_thread.start()
+
+    def _log(self, message, level="info"):
+        if self._logger is None:
+            print(message)
+        else:
+            getattr(self._logger, level)(message)
 
     def _find_device_path(self) -> Optional[str]:
         """
@@ -188,24 +203,30 @@ class Gamepad:
             self._device.grab()  # prevent other consumers from interfering (optional, but stabilizes)
             self._setup_axis_mapping()
 
-            print(f"Connected to evdev device: {path}")
-            print(f"  Name: {self._device.name}")
-            print(f"  VID:PID = {self._device.info.vendor:04x}:{self._device.info.product:04x}")
-            print(f"  Axis mapping: {self._axis_codes}")
+            self._log(f"Connected to evdev device: {path} ({self._device.name})")
+            self._log(f"VID:PID = {self._device.info.vendor:04x}:{self._device.info.product:04x}")
+            self._log(f"Axis mapping: {self._axis_codes}; stick_deadzone={self._stick_deadzone}")
+            for name, code in self._axis_codes.items():
+                if code in self._absinfo:
+                    info = self._absinfo[code]
+                    self._log(
+                        f"Axis {name}: min={info.min}, max={info.max}, "
+                        f"center={(info.min + info.max) / 2.0}, flat={info.flat}"
+                    )
             return True
 
         except PermissionError as e:
-            print(
+            self._log(
                 "PermissionError: cannot open /dev/input/event*. "
-                "Try running with sudo or add a udev rule for your device."
+                "Check input-device permissions.", "error"
             )
-            print(f"Error connecting to device: {e}")
+            self._log(f"Error connecting to device: {e}", "error")
             return False
         except OSError as e:
-            print(f"Error connecting to device: {e}")
+            self._log(f"Error connecting to device: {e}", "error")
             return False
         except Exception as e:
-            print(f"Unexpected error connecting to device: {e}")
+            self._log(f"Unexpected error connecting to device: {e}", "error")
             return False
 
     def read_loop(self):
@@ -227,10 +248,9 @@ class Gamepad:
                 # print(f"type={event.type}, code={event.code}, value={event.value}")
                 # print(f"EV_KEY={ecodes.EV_KEY}")
                 if event.type == ecodes.EV_KEY:
-                    print(f"[KEY] code={event.code} value={event.value}")
                     if event.code == 305 and event.value == 1:  # press만 감지
                         self.command_enabled = not self.command_enabled
-                        print(f"[Gamepad] command_enabled → {self.command_enabled}")
+                        self._log(f"[Gamepad] command_enabled={self.command_enabled}")
                     continue
                 if event.type != ecodes.EV_ABS:  # ← 이게 핵심
                    continue
@@ -242,7 +262,7 @@ class Gamepad:
                 if info is None:
                     continue
 
-                n = _normalize_abs(value, info)  # [-1, 1]
+                n = _normalize_abs(value, info, self._stick_deadzone)  # [-1, 1]
 
                 if code == self._axis_codes["left_x"]:
                     lx = n
@@ -255,9 +275,9 @@ class Gamepad:
                     self.wz = _interpolate(-rx, 1.0, self._vel_scale_rot)
         except OSError as e:
             # If device disconnects or read fails
-            print(f"Error reading from device: {e}")
+            self._log(f"Error reading from device: {e}", "error")
         except Exception as e:
-            print(f"Unexpected error reading from device: {e}")
+            self._log(f"Unexpected error reading from device: {e}", "error")
         finally:
             try:
               #  release grab if possible

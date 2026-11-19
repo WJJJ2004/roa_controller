@@ -23,6 +23,7 @@ ros2 bag record  \
 
 */
 #include "node/roa_main_controller.hpp"
+#include "node/policy_command.hpp"
 
 #include <roa_common/joint_limits.hpp>
 
@@ -180,7 +181,7 @@ RoaControllerNode::on_configure(const rclcpp_lifecycle::State &)
     oss << "    ankle_obs_source         : virtual RSU joint state (/rsu/state)\n";
     oss << "    ankle_target_space       : virtual ankle joint target\n";
     oss << "    ankle_actuator_source    : RSU solver output (/rsu/imp_solution)\n";
-    oss << "    cmd_stale_behavior       : zero cmd input to policy\n";
+    oss << "    cmd_stale_behavior       : stale/invalid cmd -> zero cmd input to policy\n";
     oss << "    rsu_stale_behavior       : hold last safe RSU actuator command\n";
     oss << "    timers_start_on_activate : true\n";
 
@@ -521,19 +522,11 @@ bool RoaControllerNode::build_observation(const rclcpp::Time& tnow)
   // 1) cmd
   auto [cmd_msg, cmd_rx_time] = cmd_latch_.get();
   const bool cmd_ok = (cmd_msg != nullptr) && isFreshRx(tnow, cmd_rx_time, cmd_timeout_);
-  if (cmd_ok) {
-    obs_.cmd[0] = static_cast<float>(cmd_msg->linear.x);
-    obs_.cmd[1] = static_cast<float>(cmd_msg->linear.y);
-    obs_.cmd[2] = static_cast<float>(cmd_msg->angular.z);
-
-    last_command_buffer_[0] = static_cast<float>(cmd_msg->linear.x);
-    last_command_buffer_[1] = static_cast<float>(cmd_msg->linear.y);
-    last_command_buffer_[2] = static_cast<float>(cmd_msg->angular.z);
-  } 
-  else {
-    obs_.cmd[0] = last_command_buffer_[0];
-    obs_.cmd[1] = last_command_buffer_[1];
-    obs_.cmd[2] = last_command_buffer_[2];
+  obs_.cmd = policy_command(cmd_msg.get(), cmd_ok);
+  if (!cmd_ok) {
+    RCLCPP_WARN_THROTTLE(
+      get_logger(), *get_clock(), 2000,
+      "[BuildObs] Velocity command missing or stale; using zero policy command.");
   }
 
   // 2) imu

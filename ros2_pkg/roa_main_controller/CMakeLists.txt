@@ -74,4 +74,11 @@ install(DIRECTORY launch config
   DESTINATION share/${PROJECT_NAME}
 )
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_policy_command test/test_policy_command.cpp)
+  target_include_directories(test_policy_command PRIVATE include)
+  ament_target_dependencies(test_policy_command geometry_msgs)
+endif()
+
 ament_package()

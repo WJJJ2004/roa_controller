@@ -9,6 +9,7 @@ from geometry_msgs.msg import Twist
 import numpy as np
 
 from roa_cmd_test.gamepad_reader import Gamepad
+from roa_cmd_test.gamepad_reader import __file__ as GAMEPAD_SOURCE
 
 
 SIM2SIM_LIMITS = np.array([1.0, 0.5, 1.0], dtype=np.float32)
@@ -47,6 +48,7 @@ class RoaVelocityCommandTestNode(Node):
         self.declare_parameter("device_path", "")
         self.declare_parameter("vendor_id", 0x046D)
         self.declare_parameter("product_id", 0xC219)
+        self.declare_parameter("stick_deadzone", 0.05)
 
         cmd_topic = str(self.get_parameter("cmd_topic").value)
         self.publish_rate_hz = float(self.get_parameter("publish_rate_hz").value)
@@ -59,12 +61,15 @@ class RoaVelocityCommandTestNode(Node):
         self.device_path = str(self.get_parameter("device_path").value)
         self.vendor_id = int(self.get_parameter("vendor_id").value)
         self.product_id = int(self.get_parameter("product_id").value)
+        self.stick_deadzone = float(self.get_parameter("stick_deadzone").value)
 
         # ===== safety check =====
         if not math.isfinite(self.publish_rate_hz) or self.publish_rate_hz <= 0.0:
             raise ValueError("publish_rate_hz must be finite and positive")
         if not np.all(np.isfinite(configured_limits)) or np.any(configured_limits <= 0.0):
             raise ValueError("max_vx, max_vy and max_wz must be finite and positive")
+        if not math.isfinite(self.stick_deadzone) or not 0.0 <= self.stick_deadzone < 1.0:
+            raise ValueError("stick_deadzone must be finite and in [0, 1)")
         self.period = 1.0 / self.publish_rate_hz
         self.limits = np.minimum(configured_limits, SIM2SIM_LIMITS)
 
@@ -80,6 +85,8 @@ class RoaVelocityCommandTestNode(Node):
             vel_scale_rot=float(SIM2SIM_LIMITS[2]),
             device_path=(self.device_path if self.device_path else None),
             prefer_name_contains="Logitech",
+            stick_deadzone=self.stick_deadzone,
+            logger=self.get_logger(),
         )
 
         self.timer = self.create_timer(self.period, self.timer_callback)
@@ -90,7 +97,10 @@ class RoaVelocityCommandTestNode(Node):
             f"  rate         : {self.publish_rate_hz:.1f} Hz\n"
             f"  period       : {self.period:.4f} sec\n"
             f"  limits       : vx={self.limits[0]}, vy={self.limits[1]}, wz={self.limits[2]}\n"
-            f"  input        : direct gamepad velocity; disabled/disconnected/invalid -> zero"
+            f"  input        : direct-v2; neutral/disabled/disconnected/invalid -> zero\n"
+            f"  deadzone     : {self.stick_deadzone:.3f} (normalized, before velocity scaling)\n"
+            f"  node source  : {__file__}\n"
+            f"  reader source: {GAMEPAD_SOURCE}"
         )
 
     def timer_callback(self):
@@ -102,8 +112,10 @@ class RoaVelocityCommandTestNode(Node):
         command, status = bounded_gamepad_command(raw, self.gamepad.is_running, self.limits)
         self.publish_cmd(float(command[0]), float(command[1]), float(command[2]))
         if status == "enabled":
+            mode = "neutral" if np.all(command == 0.0) else "enabled"
             self.get_logger().info(
-                f"[CMD] vx={command[0]: .3f}, vy={command[1]: .3f}, wz={command[2]: .3f}",
+                f"[CMD {mode}] input={np.asarray(raw)[:3].tolist()} "
+                f"published=[{command[0]: .6f}, {command[1]: .6f}, {command[2]: .6f}]",
                 throttle_duration_sec=0.5,
             )
         else:

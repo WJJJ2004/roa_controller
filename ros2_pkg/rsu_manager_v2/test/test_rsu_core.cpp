@@ -29,7 +29,7 @@ TEST(RsuModel, NeutralStateAndImpedance)
   lut.load(RSU_V2_TEST_LUT);
   StateEstimator estimator(lut);
   estimator.reset({0.0, 0.0}, {0.0, 0.0});
-  const auto state = estimator.update({0.0, 0.0}, {0.0, 0.0}, 1.0 / 50.0);
+  const auto state = estimator.update({0.0, 0.0}, {0.0, 0.0}, 1.0 / 200.0);
   ASSERT_TRUE(state.valid);
   EXPECT_NEAR(state.q[0], 0.0, 1e-7);
   EXPECT_NEAR(state.q[1], 0.0, 1e-7);
@@ -60,7 +60,7 @@ TEST(RsuModel, VelocityTracksJacobianImmediatelyWithObservationClip)
     const std::array<double, 2> motor_velocity{
       query.jacobian[0] * expected[0] + query.jacobian[1] * expected[1],
       query.jacobian[2] * expected[0] + query.jacobian[3] * expected[1]};
-    const auto state = estimator.update(query.alpha, motor_velocity, 0.02);
+    const auto state = estimator.update(query.alpha, motor_velocity, 0.005);
     ASSERT_TRUE(state.valid);
     EXPECT_NEAR(state.qd[0], std::clamp(expected[0], -5.235987756, 5.235987756), 1e-4);
     EXPECT_NEAR(state.qd[1], std::clamp(expected[1], -5.235987756, 5.235987756), 1e-4);
@@ -76,7 +76,7 @@ TEST(RsuModel, PositionDifferenceDoesNotContaminateMeasuredZeroVelocity)
   estimator.reset(initial, lut.query(initial[0], initial[1]).alpha);
   const auto shifted = lut.query(0.01, -0.39);
   ASSERT_TRUE(shifted.valid);
-  const auto state = estimator.update(shifted.alpha, {0.0, 0.0}, 0.02);
+  const auto state = estimator.update(shifted.alpha, {0.0, 0.0}, 0.005);
   ASSERT_TRUE(state.valid);
   EXPECT_NEAR(state.q[0], 0.01, 1e-4);
   EXPECT_NEAR(state.q[1], -0.39, 1e-4);
