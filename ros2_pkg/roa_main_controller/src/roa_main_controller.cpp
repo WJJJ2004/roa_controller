@@ -180,9 +180,11 @@ RoaControllerNode::on_configure(const rclcpp_lifecycle::State &)
     oss << "    Action Blend Action      : true\n";
     oss << "    ankle_obs_source         : virtual RSU joint state (/rsu/state)\n";
     oss << "    ankle_target_space       : virtual ankle joint target\n";
-    oss << "    ankle_actuator_source    : RSU solver output (/rsu/imp_solution)\n";
+    oss << "    ankle_actuator_source    : " << (rsu_direct_torque_
+      ? "direct RSU torque at HW iface (/rsu/torque_command)" : "RSU solver output (/rsu/imp_solution)") << "\n";
     oss << "    cmd_stale_behavior       : stale/invalid cmd -> zero cmd input to policy\n";
-    oss << "    rsu_stale_behavior       : hold last safe RSU actuator command\n";
+    oss << "    rsu_stale_behavior       : " << (rsu_direct_torque_
+      ? "HW torque watchdog freezes; lifecycle reactivation required" : "hold last safe RSU actuator command") << "\n";
     oss << "    timers_start_on_activate : true\n";
 
     RCLCPP_INFO(get_logger(), "%s", oss.str().c_str());
@@ -303,6 +305,12 @@ void RoaControllerNode::declareAndLoadParams()
   if (!this->has_parameter("REALTIME_CONTROL_MODE")) {
     this->declare_parameter<bool>("REALTIME_CONTROL_MODE", is_realtime_control_mode_);
   }
+  if (!has_parameter("rsu_control_mode")) declare_parameter<std::string>("rsu_control_mode", "impedance");
+  const auto rsu_mode = get_parameter("rsu_control_mode").as_string();
+  if (rsu_mode != "impedance" && rsu_mode != "torque")
+    throw std::invalid_argument("rsu_control_mode must be impedance or torque");
+  rsu_direct_torque_ = rsu_mode == "torque";
+
   // rates
   if (!this->has_parameter("hw_rate_hz")) {
     this->declare_parameter<double>("hw_rate_hz", hw_rate_hz_);
@@ -969,7 +977,7 @@ void RoaControllerNode::ControlLoop()
     rsu_msg->feasible &&
     isFreshStamp(tnow, rsu_msg->header.stamp, rsu_timeout_);
 
-  if (rsu_ok) {
+  if (!rsu_direct_torque_ && rsu_ok) {
     auto valid_gain = [](float kp, float kd) {
       return std::isfinite(kp) &&
             std::isfinite(kd) &&
@@ -1010,7 +1018,7 @@ void RoaControllerNode::ControlLoop()
         get_logger(), *get_clock(), 2000,
         "[ControlLoop] RSU solution contains NaN/Inf. Holding previous safe RSU command.");
     }
-  } else if (loop_count >
+  } else if (!rsu_direct_torque_ && loop_count >
     static_cast<int>(std::ceil(hw_rate_hz_ / std::max(1.0, policy_rate_hz_))) + 1)
   {
     // Allow one policy period plus one HW tick before warning about a missing RSU solution.

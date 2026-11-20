@@ -226,6 +226,7 @@ rclcpp::Time last_lpf_update_time_{0, 0, RCL_ROS_TIME};
   double policy_rate_hz_{50.0};
   double status_rate_hz_{10.0};
 
+  bool rsu_direct_torque_{false};
   double rsu_timeout_ms_{50.0};
   double cmd_timeout_ms_{50.0};
   double imu_timeout_ms_{50.0};

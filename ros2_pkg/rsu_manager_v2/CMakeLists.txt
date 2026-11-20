@@ -26,10 +26,12 @@ add_executable(rsu_manager_v2_node src/rsu_manager_v2_node.cpp)
 target_link_libraries(rsu_manager_v2_node rsu_manager_v2_core Threads::Threads)
 ament_target_dependencies(rsu_manager_v2_node rclcpp roa_interfaces realtime_tools ament_index_cpp)
 
-install(TARGETS rsu_manager_v2_core rsu_manager_v2_node
+install(TARGETS rsu_manager_v2_core
+  EXPORT export_rsu_manager_v2
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME})
+install(TARGETS rsu_manager_v2_node RUNTIME DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY config launch data DESTINATION share/${PROJECT_NAME})
 
@@ -41,4 +43,6 @@ if(BUILD_TESTING)
     RSU_V2_TEST_LUT="${CMAKE_CURRENT_SOURCE_DIR}/data/rsu_lut_v2.bin")
 endif()
 
+ament_export_targets(export_rsu_manager_v2 HAS_LIBRARY_TARGET)
+ament_export_include_directories(include)
 ament_package()
