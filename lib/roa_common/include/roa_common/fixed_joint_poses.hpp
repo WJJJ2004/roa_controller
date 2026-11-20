@@ -28,8 +28,8 @@ constexpr VirtualJointPose12Dof make_policy_default_virtual_pose()
   pose.right_hip_yaw = 0.13962633907794952f;
   pose.left_knee_pitch = 0.76794487237930300f;
   pose.right_knee_pitch = -0.76794487237930300f;
-  pose.left_ankle_pitch = -0.36651915311813354f;
-  pose.right_ankle_pitch = 0.36651915311813354f;
+  pose.left_ankle_pitch  = -0.36651915311813354f + 0.0872665;
+  pose.right_ankle_pitch =  0.36651915311813354f - 0.0872665;  // 발목부 조립오차 5도 보정
   pose.left_ankle_roll = 0.0f;
   pose.right_ankle_roll = 0.0f;
   // WARN: DO NOT EDIT THESE VALUES. UNLESS YOU EDIT THE POLICY'S TRAINING DATA.
@@ -77,8 +77,8 @@ constexpr VirtualJointPose12Dof make_blend_start_virtual_pose()
   pose.right_knee_pitch = -0.7768565353f;
 
   // ---------- RSU JOINT ----------  
-  pose.left_ankle_pitch = -0.3632938872f;
-  pose.right_ankle_pitch = 0.3632938872f;
+  pose.left_ankle_pitch = -0.3632938872f + 0.0872665; // 발목부 조립오차 5도 보정
+  pose.right_ankle_pitch = 0.3632938872f - 0.0872665; // 발목부 조립오차 5도 보정
   pose.left_ankle_roll = 0.0f;
   pose.right_ankle_roll = 0.0f;
   return pose;
@@ -106,10 +106,11 @@ constexpr ActuatorPose12Dof make_hardware_boot_actuator_pose()
   pose.right_knee_pitch = -0.7768565353f;
   
   // ---------- RSU JOINT ----------  
-  pose.left_rsu_upper = -0.3632938872f;
-  pose.right_rsu_upper = 0.3632938872f;
-  pose.left_rsu_lower = 0.3632938872f;
-  pose.right_rsu_lower = -0.3632938872f;
+  pose.left_rsu_upper = -0.3632938872f + 0.0872665; // 발목부 조립오차 5도 보정
+  pose.left_rsu_lower = 0.3632938872f - 0.0872665; // 발목부 조립오차 5도 보정
+
+  pose.right_rsu_upper = 0.3632938872f - 0.0872665; // 발목부 조립오차 5도 보정
+  pose.right_rsu_lower = -0.3632938872f + 0.0872665; // 발목부 조립오차 5도 보정
   return pose;
 }
 
